@@ -9,20 +9,25 @@ function addRow() {
   const newRow = document.createElement("tr");
   newRow.classList.add("questionInputs");
   newRow.innerHTML = `
-    <td><input class="questionInput" placeholder="bonjour" /></td>
-    <td><input class="answerInput" placeholder="hello" /></td>
+    <td><div class="customInputWrapper"><input class="customInput questionInput" placeholder="bonjour" /></div></td>
+    <td><div class="customInputWrapper"><input class="customInput answerInput" placeholder="hello" /></div></td>
     <td><button class="removeBtn" aria-label="Remove"><img src="./close.svg" /></button></td>
   `;
 
   const questionInput = newRow.querySelector(".questionInput");
   const answerInput = newRow.querySelector(".answerInput");
+  const removeBtn = newRow.querySelector(".removeBtn");
 
-  // changed my mind on UX - not going to use checkValuesFinished
-  // questionInput.addEventListener("change", checkValuesFinished);
-  // answerInput.addEventListener("change", checkValuesFinished);
+  questionInput.addEventListener("focus", checkFocus);
+  answerInput.addEventListener("focus", checkFocus);
+
+  questionInput.addEventListener("blur", checkFocus);
+  answerInput.addEventListener("blur", checkFocus);
 
   questionInput.addEventListener("input", checkValues);
   answerInput.addEventListener("input", checkValues);
+
+  removeBtn.addEventListener("click", () => newRow.remove());
 
   questionsBody.appendChild(newRow);
 
@@ -38,26 +43,14 @@ function addRow() {
       addRow();
   }
 
-  // changed my mind on UX - not going to use checkValuesFinished
-  // function checkValuesFinished() {
-  //   questionInput.value = questionInput.value.trim();
-  //   answerInput.value = answerInput.value.trim();
-
-  //   const allInputs = Array.from(
-  //     questions.querySelectorAll("tr.questionInputs")
-  //   );
-  //   const index = allInputs.indexOf(newRow);
-  //   console.log(document.activeElement);
-  //   if (
-  //     index !== allInputs.length - 1 &&
-  //     !questionInput.value &&
-  //     !answerInput.value &&
-  //     ![questionInput, answerInput].includes(document.activeElement)
-  //   )
-  //     newRow.remove();
-  // }
+  function checkFocus(e) {
+    const elem = e.target;
+    const elemParent = elem.parentElement;
+    if (document.activeElement === elem) elemParent.dataset.focus = true;
+    else delete elemParent.dataset.focus;
+  }
 }
 
 saveBtn.addEventListener("click", () => {
-  electronStore.set("");
+  // electronStore.set("");
 });
