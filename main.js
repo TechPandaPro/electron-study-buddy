@@ -41,6 +41,7 @@ const createWindows = () => {
   });
   quizWin.loadFile("windows/quiz/index.html");
 
+  // icon from https://flowbite.com/
   tray = new Tray(path.join(__dirname, "icon.png"));
   tray.on("click", () => {
     console.log("Tray clicked");
