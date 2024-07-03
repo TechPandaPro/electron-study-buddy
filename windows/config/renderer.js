@@ -52,5 +52,26 @@ function addRow() {
 }
 
 saveBtn.addEventListener("click", () => {
+  const questionElems = questionsBody.querySelectorAll("tr.questionInputs");
+  let questions = Array.from(questionElems).map((question) => ({
+    question: question.querySelector(".questionInput").value,
+    answer: question.querySelector(".answerInput").value,
+    elem: question,
+  }));
+
+  for (let i = 0; i < questions.length - 1; i++) {
+    const question = questions[i];
+    if (!question.question || !question.answer)
+      question.elem.querySelector(".removeBtn").click();
+  }
+
+  questions = questions.filter(
+    (question) => question.question && question.answer
+  );
+
+  console.log(questions);
+
+  return questions;
+
   // electronStore.set("");
 });
