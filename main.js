@@ -9,6 +9,7 @@ let configWin;
 let quizWin;
 
 const createWindows = () => {
+  // TODO: set backgroundColor on both windows (should match whatever is in CSS)
   configWin = new BrowserWindow({
     width: 800,
     height: 600,

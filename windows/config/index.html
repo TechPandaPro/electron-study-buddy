@@ -7,12 +7,12 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'"
     />
-    <title>Study Buddy Config</title>
+    <title>Study Buddy Dashboard</title>
     <script src="./renderer.js" defer></script>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <h1>Study Buddy Config</h1>
+    <h1>Study Buddy Dashboard</h1>
     <!-- We are using Node.js <span id="node-version"></span>, Chromium -->
     <!-- <span id="chrome-version"></span>, and Electron -->
     <!-- <span id="electron-version"></span>. -->
@@ -21,6 +21,9 @@
       <input />
       <input />
     </div> -->
+    <h2>Study</h2>
+    <button class="styledButton" id="quizDemoBtn">Quiz Demo</button>
+    <h2>Configuration</h2>
     <div id="questionsWrapperOuter">
       <div id="questionsWrapper">
         <button id="flipQuestionsBtn" aria-label="Flip Questions/Answers">
@@ -47,19 +50,24 @@
     </div>
     <!-- TODO: better formatting, save these with JS, better options, etc -->
     <input type="checkbox" id="popQuizzesEnabled" />
-    <label for="popQuizzesEnabled">Begin pop quizzes at random intervals</label>
-    <div>
-      <span>Start pop quizzes</span>
-      <select>
+    <label for="popQuizzesEnabled">Begin pop quizzes randomly</label>
+    <div id="popQuizIntervalContainer">
+      <span>Start pop quizzes </span>
+      <select id="popQuizIntervalCount">
         <option value="1">once</option>
         <option value="2">twice</option>
-        <option value="2">5 times</option>
-        <option value="2">10 times</option>
+        <option value="5">5 times</option>
+        <option value="10">10 times</option>
+        <option value="20">20 times</option>
       </select>
-      <span>per hour</span>
+      <span>per </span>
+      <select id="popQuizIntervalTime">
+        <option value="1">hour</option>
+        <option value="6">6 hours</option>
+        <option value="12">12 hours</option>
+      </select>
     </div>
     <!-- -->
-    <button id="saveBtn">Save</button>
-    <button id="quizDemoBtn">Quiz Demo</button>
+    <button class="styledButton" id="saveBtn">Save</button>
   </body>
 </html>

@@ -1,8 +1,21 @@
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  padding: 10px;
+
   background-color: rgb(255 255 255);
   color: rgb(10 10 10);
+
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.styledButton {
+  border-radius: 5px;
+  padding: 5px 15px;
+  font-size: 0.9em;
+  cursor: pointer;
+  color: inherit;
+  border: 2px solid rgb(50 50 50);
+  background-color: rgb(135 206 235 / 0.3);
 }
 
 #questionsWrapper {
@@ -184,6 +197,23 @@ table#questions tbody tr:last-of-type .removeBtn {
   height: 12px;
   fill: blue;
   stroke: blue;
+}
+
+#popQuizIntervalContainer {
+  transition: opacity 0.2s;
+}
+
+#popQuizIntervalContainer[data-disabled] {
+  opacity: 0.4;
+}
+
+#popQuizIntervalContainer select {
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+
+  border: 1px solid rgb(128 128 128);
+  border-radius: 4px;
 }
 
 @media (prefers-color-scheme: dark) {

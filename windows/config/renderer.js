@@ -6,7 +6,23 @@
   const saveBtn = document.getElementById("saveBtn");
   const quizDemoBtn = document.getElementById("quizDemoBtn");
 
-  const questions = (await electronStore.get(`questions`)) ?? [];
+  const popQuizzesEnabledElem = document.getElementById("popQuizzesEnabled");
+  const popQuizIntervalCountElem = document.getElementById(
+    "popQuizIntervalCount"
+  );
+  const popQuizIntervalTimeElem = document.getElementById(
+    "popQuizIntervalTime"
+  );
+  const popQuizIntervalContainer = document.getElementById(
+    "popQuizIntervalContainer"
+  );
+
+  const popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {};
+  const questions = (await electronStore.get("questions")) ?? [];
+
+  popQuizzesEnabledElem.checked = popQuizConfig.enabled;
+  popQuizIntervalCountElem.value = popQuizConfig.intervalCount;
+  popQuizIntervalTimeElem.value = popQuizConfig.intervalTime;
 
   for (const question of questions) addRow(question.question, question.answer);
 
@@ -111,12 +127,33 @@
       answer: question.answer,
     }));
 
-    await electronStore.set(`questions`, questions);
+    const popQuizConfig = {
+      enabled: popQuizzesEnabledElem.checked,
+      intervalCount: Number(popQuizIntervalCountElem.value),
+      intervalTime: Number(popQuizIntervalTimeElem.value),
+    };
+
+    await electronStore.set("popQuizConfig", popQuizConfig);
+    await electronStore.set("questions", questions);
 
     return questions;
   });
 
   quizDemoBtn.addEventListener("click", () => window.electronAPI.startQuiz());
+
+  updatePopQuizIntervalEnabled();
+
+  popQuizzesEnabledElem.addEventListener("input", updatePopQuizIntervalEnabled);
+
+  function updatePopQuizIntervalEnabled() {
+    const popQuizzesEnabled = popQuizzesEnabledElem.checked;
+
+    if (popQuizzesEnabled) delete popQuizIntervalContainer.dataset.disabled;
+    else popQuizIntervalContainer.dataset.disabled = true;
+
+    const inputElems = popQuizIntervalContainer.querySelectorAll("select");
+    for (const inputElem of inputElems) inputElem.disabled = !popQuizzesEnabled;
+  }
 
   // window.electronAPI.startQuiz();
 })();
