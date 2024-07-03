@@ -17,7 +17,14 @@
     newRow.innerHTML = `
       <td><div class="customInputWrapper"><input class="customInput questionInput" placeholder="bonjour" /></div></td>
       <td><div class="customInputWrapper"><input class="customInput answerInput" placeholder="hello" /></div></td>
-      <td><button class="removeBtn" aria-label="Remove"><img src="./close.svg" /></button></td>
+      <td>
+        <button class="removeBtn" aria-label="Remove">
+          <svg width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 11L129 129" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
+            <path d="M11 129L129 11" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </td>
     `;
 
     const questionInput = newRow.querySelector(".questionInput");
