@@ -17,8 +17,10 @@
     "popQuizIntervalContainer"
   );
 
-  const popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {};
-  const questions = (await electronStore.get("questions")) ?? [];
+  // fetch dashboard config data
+  let popQuizConfig;
+  let questions;
+  await updateSavedCachedData();
 
   popQuizzesEnabledElem.checked = popQuizConfig.enabled;
   popQuizIntervalCountElem.value = popQuizConfig.intervalCount;
@@ -108,9 +110,37 @@
       questionElem.value = answerVal;
       answerElem.value = questionVal;
     }
+    checkNeedsSave();
   });
 
   saveBtn.addEventListener("click", async () => {
+    const dataToSave = retrieveDataToSave(true);
+    await electronStore.set("popQuizConfig", dataToSave.popQuizConfig);
+    await electronStore.set("questions", dataToSave.questions);
+    await updateSavedCachedData(dataToSave);
+    checkNeedsSave();
+  });
+
+  function retrieveSavedCachedData() {
+    return { popQuizConfig, questions };
+  }
+
+  async function updateSavedCachedData(data = {}) {
+    if (data.popQuizConfig) popQuizConfig = data.popQuizConfig;
+    else
+      popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {
+        enabled: false,
+        intervalCount: 2,
+        time: 1,
+      };
+
+    if (data.questions) questions = data.questions;
+    else questions = (await electronStore.get("questions")) ?? [];
+
+    return { popQuizConfig, questions };
+  }
+
+  function retrieveDataToSave(updateInterface) {
     const questionElems = questionsBody.querySelectorAll("tr.questionInputs");
     let questions = Array.from(questionElems).map((question) => ({
       question: question.querySelector(".questionInput").value,
@@ -118,10 +148,12 @@
       elem: question,
     }));
 
-    for (let i = 0; i < questions.length - 1; i++) {
-      const question = questions[i];
-      if (!question.question || !question.answer)
-        question.elem.querySelector(".removeBtn").click();
+    if (updateInterface) {
+      for (let i = 0; i < questions.length - 1; i++) {
+        const question = questions[i];
+        if (!question.question || !question.answer)
+          question.elem.querySelector(".removeBtn").click();
+      }
     }
 
     questions = questions.filter(
@@ -139,16 +171,25 @@
       intervalTime: Number(popQuizIntervalTimeElem.value),
     };
 
-    await electronStore.set("popQuizConfig", popQuizConfig);
-    await electronStore.set("questions", questions);
-
-    return questions;
-  });
+    return { popQuizConfig, questions };
+  }
 
   quizDemoBtn.addEventListener("click", () => window.electronAPI.startQuiz());
 
-  updatePopQuizIntervalEnabled();
+  // when any input is changed, check if the save button needs to be emphasized
+  document.addEventListener("input", checkNeedsSave);
 
+  function checkNeedsSave() {
+    const oldData = JSON.stringify(retrieveSavedCachedData());
+    const newData = JSON.stringify(retrieveDataToSave());
+
+    const needsSave = oldData !== newData;
+
+    if (needsSave) saveBtn.dataset.needsSave = true;
+    else delete saveBtn.dataset.needsSave;
+  }
+
+  updatePopQuizIntervalEnabled();
   popQuizzesEnabledElem.addEventListener("input", updatePopQuizIntervalEnabled);
 
   function updatePopQuizIntervalEnabled() {

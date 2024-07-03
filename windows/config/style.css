@@ -16,14 +16,82 @@ body {
   color: inherit;
   border: 2px solid rgb(50 50 50);
   background-color: rgb(135 206 235 / 0.3);
+  transition: background-color 0.2s;
+}
+
+.styledButton:hover {
+  background-color: rgb(135 206 235 / 0.37);
+}
+
+.styledButton:active {
+  background-color: rgb(135 206 235 / 0.25);
+}
+
+#saveBtn[data-needs-save] {
+  background-color: rgb(255 95 21 / 0.7);
+}
+
+/* #saveBtn[data-needs-save] {
+  background-color: rgb(255 95 21 / 0.7);
+  animation-name: expand;
+  animation-duration: 1s;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes expand {
+  to {
+    transform: scale(1.08);
+  }
+} */
+
+/* #saveBtn[data-needs-save] {
+  background-color: rgb(255 95 21 / 0.7);
+  animation-name: shake;
+  animation-duration: 0.2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(1px, 1px);
+  }
+  20% {
+    transform: translate(-1px, -1px);
+  }
+  40% {
+    transform: translate(1px, 0px);
+  }
+  60% {
+    transform: translate(0px, -1px);
+  }
+  80% {
+    transform: translate(0px, 0px);
+  }
+  100% {
+    transform: translate(-1px, 0px);
+  }
+} */
+
+#saveBtn[data-needs-save]:hover {
+  background-color: rgb(255 95 21 / 0.77);
+}
+
+#saveBtn[data-needs-save]:active {
+  background-color: rgb(255 95 21 / 0.65);
 }
 
 #dashboardContainer {
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
   width: min(50%, 1000px);
   min-width: min(100%, 500px);
   margin: 0 auto;
+}
+
+h1:first-child {
+  margin-top: 0.3em;
 }
 
 #questionsWrapper {
