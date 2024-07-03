@@ -18,13 +18,24 @@ body {
   background-color: rgb(135 206 235 / 0.3);
 }
 
+#dashboardContainer {
+  padding: 10px;
+  box-sizing: border-box;
+  width: min(50%, 1000px);
+  min-width: min(100%, 500px);
+  margin: 0 auto;
+}
+
 #questionsWrapper {
   display: inline-block;
   position: relative;
-  overflow: hidden;
+  overflow: auto;
 
   border: 2px solid gray;
   border-radius: 5px;
+
+  box-sizing: border-box;
+  width: 100%;
 
   padding: 5px 0;
 }
@@ -72,6 +83,7 @@ body {
 
 table#questions {
   border-collapse: collapse;
+  width: 100%;
 }
 
 table#questions tr th:first-of-type,
@@ -79,9 +91,10 @@ table#questions tr td:first-of-type {
   padding-left: 10px;
 }
 
-table#questions tr th:last-of-type,
 table#questions tr td:last-of-type {
   padding-right: 10px;
+  width: 35px;
+  box-sizing: border-box;
 }
 
 table#questions thead .thInner {
@@ -162,6 +175,9 @@ table#questions tbody tr td:nth-of-type(2) {
 
   background-color: transparent;
   text-overflow: ellipsis;
+
+  width: 100%;
+  box-sizing: border-box;
 }
 
 table#questions tbody tr:last-of-type .removeBtn {

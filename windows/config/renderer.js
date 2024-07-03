@@ -64,12 +64,6 @@
 
     questionsBody.appendChild(newRow);
 
-    const newCellBoundingRect = newRow
-      .querySelector("td")
-      .getBoundingClientRect();
-    flipQuestionsBtn.style.left = `${newCellBoundingRect.width}px`;
-    flipQuestionsBtn.style.top = `${newCellBoundingRect.height / 2 + 5}px`;
-
     function checkValues() {
       const allInputs = Array.from(
         questionsBody.querySelectorAll("tr.questionInputs")
@@ -88,6 +82,18 @@
       if (document.activeElement === elem) elemParent.dataset.focus = true;
       else delete elemParent.dataset.focus;
     }
+  }
+
+  repositionFlipQuestionsBtn();
+
+  window.addEventListener("resize", repositionFlipQuestionsBtn);
+
+  function repositionFlipQuestionsBtn() {
+    const firstCellBoundingRect = questionsBody
+      .querySelector(".questionInputs td")
+      .getBoundingClientRect();
+    flipQuestionsBtn.style.left = `${firstCellBoundingRect.width}px`;
+    flipQuestionsBtn.style.top = `${firstCellBoundingRect.height / 2 + 5}px`;
   }
 
   flipQuestionsBtn.addEventListener("click", () => {
