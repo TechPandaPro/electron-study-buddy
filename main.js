@@ -22,12 +22,16 @@ const createWindows = () => {
     // TODO: figure out window closing (see below in other listener)
     e.preventDefault();
     configWin.hide();
+    // TODO: add alert when closing if unsaved (look into various methods for this)
   });
   configWin.loadFile("windows/config/index.html");
 
   quizWin = new BrowserWindow({
     width: 800,
     height: 600,
+    // frame: false,
+    resizable: false,
+    // movable: false,
     webPreferences: {
       preload: path.join(__dirname, "windows", "quiz", "preload.js"),
     },
@@ -61,6 +65,7 @@ app.whenReady().then(() => {
   );
   ipcMain.handle("electron-store-get", (_event, key) => store.get(key));
   ipcMain.handle("electron-store-delete", (_event, key) => store.delete(key));
+  ipcMain.handle("quiz-start", () => startQuiz());
 
   createWindows();
 
@@ -85,4 +90,9 @@ function setQuizPosition() {
   const windowY = Math.round(trayY + trayHeight + 10);
 
   quizWin.setPosition(windowX, windowY, false);
+}
+
+function startQuiz() {
+  setQuizPosition();
+  quizWin.show();
 }

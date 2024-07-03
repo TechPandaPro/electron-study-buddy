@@ -7,13 +7,21 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'"
     />
-    <title>(Quiz) Hello World!</title>
+    <title>Studdy Buddy Pop Quiz!</title>
     <script src="./renderer.js" defer></script>
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <h1>(Quiz) Hello World!</h1>
+    <!-- <h1>(Quiz) Hello World!</h1>
     We are using Node.js <span id="node-version"></span>, Chromium
     <span id="chrome-version"></span>, and Electron
-    <span id="electron-version"></span>.
+    <span id="electron-version"></span>. -->
+    <h1>Pop Quiz!</h1>
+    <div id="question"></div>
+    <input id="answerInput" placeholder="Give it a try here!" />
+    <div id="responseBtnsContainer">
+      <button id="submitBtn">Submit</button>
+      <button id="unsureBtn">I'm Unsure &#129300;</button>
+    </div>
   </body>
 </html>

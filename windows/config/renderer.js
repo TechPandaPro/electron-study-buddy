@@ -4,6 +4,7 @@
   const questionsBody = document.querySelector("#questions tbody");
   const flipQuestionsBtn = document.getElementById("flipQuestionsBtn");
   const saveBtn = document.getElementById("saveBtn");
+  const quizDemoBtn = document.getElementById("quizDemoBtn");
 
   const questions = (await electronStore.get(`questions`)) ?? [];
 
@@ -114,4 +115,8 @@
 
     return questions;
   });
+
+  quizDemoBtn.addEventListener("click", () => window.electronAPI.startQuiz());
+
+  // window.electronAPI.startQuiz();
 })();

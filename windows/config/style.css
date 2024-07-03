@@ -21,13 +21,17 @@ body {
   position: absolute;
   z-index: 1;
 
-  border: none;
   background-color: transparent;
+  border: none;
+  outline: none;
 
   padding: 0;
   cursor: pointer;
 
   transform: translate(-50%, -50%);
+
+  filter: opacity(0.5);
+  transition: filter 0.3s, transform 0.3s;
 }
 
 #flipQuestionsBtn,
@@ -38,11 +42,6 @@ body {
 #flipQuestionsBtn svg {
   width: 16px;
   height: 16px;
-}
-
-#flipQuestionsBtn {
-  filter: opacity(0.5);
-  transition: filter 0.3s, transform 0.3s;
 }
 
 #flipQuestionsBtn:focus,

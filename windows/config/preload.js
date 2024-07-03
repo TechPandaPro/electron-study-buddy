@@ -17,4 +17,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     get: (key) => ipcRenderer.invoke("electron-store-get", key),
     delete: (key) => ipcRenderer.invoke("electron-store-delete", key),
   },
+  startQuiz: () => ipcRenderer.invoke("quiz-start"),
 });
