@@ -55,6 +55,7 @@ h1 {
   width: 300px;
 }
 
+/* FIXME: cursor should only be pointer when button is enabled (also, styling for :disabled is needed) */
 #submitBtn,
 #unsureBtn {
   flex-grow: 1;
@@ -80,9 +81,60 @@ h1 {
   /* animation-timing-function: ease-out; */
 }
 
+.hint.emphasized {
+  animation-name: emphasizedHint;
+  animation-duration: 0.5s;
+  animation-direction: alternate;
+  animation-iteration-count: 2;
+}
+
 .hint svg {
   width: 250px;
   height: auto;
+}
+
+.hintTextWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  height: 100%;
+  padding-right: 12%;
+
+  font-size: 1.7em;
+  color: rgb(0 0 0);
+}
+
+.hintText {
+  width: 85%;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+/* TODO: disable text selection */
+.hintTextAnswer {
+  /* necessary for animations */
+  display: block;
+
+  opacity: 0;
+
+  animation: hintAnswerSkew 1s 0.5s 7 alternate forwards ease-in-out,
+    hintAnswerSkewFinal 1s 7s forwards ease-in-out,
+    hintAnswerFade 9s 0.5s forwards;
+
+  /* animation-name: hintAnswerDistort;
+  animation-duration: 3s;
+  animation-delay: 0.5s;
+  animation-fill-mode: forwards;
+  animation-timing-function: linear; */
+}
+
+.backgroundBubble {
+  display: flex;
 }
 
 @keyframes hintSlideIn {
@@ -90,3 +142,68 @@ h1 {
     transform: translateX(200%) translateY(-120%);
   }
 }
+
+@keyframes emphasizedHint {
+  to {
+    /* TODO: just an example - change this */
+    transform: scale(1.5);
+  }
+}
+
+@keyframes hintAnswerSkew {
+  from {
+    transform: skew(-5deg, -5deg);
+  }
+
+  to {
+    transform: skew(5deg, 5deg);
+  }
+
+  /* 50% {
+    transform: skew(10deg, 10deg);
+  }
+
+  100% {
+    transform: skew(-10deg, -10deg);
+  } */
+}
+
+@keyframes hintAnswerSkewFinal {
+  to {
+    transform: skew(0, 0);
+  }
+}
+
+@keyframes hintAnswerFade {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+  }
+
+  70% {
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+/* @keyframes hintAnswerDistort {
+  from {
+    opacity: 0;
+    transform: skew(0, 0);
+    filter: blur(5px);
+  }
+
+  50% {
+    transform: skew(-10deg, -10deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: skew(10deg, 10deg);
+    filter: blur(0);
+  }
+} */
