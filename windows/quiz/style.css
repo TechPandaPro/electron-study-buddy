@@ -10,6 +10,8 @@ body {
   justify-content: center;
   gap: 20px;
 
+  overflow: hidden;
+
   box-sizing: border-box;
 
   margin: 0;
@@ -29,16 +31,21 @@ h1 {
 #question {
   font-size: 4em;
   font-weight: normal;
+  word-break: break-all;
 }
 
 #answerInput {
   background-color: transparent;
   color: inherit;
-  border: none;
-  outline: none;
+
   font: inherit;
   font-size: 2em;
+
+  border: none;
+  outline: none;
+
   text-align: center;
+  text-overflow: ellipsis;
 }
 
 #responseBtnsContainer {
@@ -61,4 +68,25 @@ h1 {
   border-radius: 8px;
   /* FIXME: update border and perhaps add an inset box shadow */
   /* box-shadow: 0 0 30px black inset; */
+}
+
+.hint {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-120%);
+  animation-name: hintSlideIn;
+  animation-duration: 0.5s;
+  /* animation-timing-function: ease-out; */
+}
+
+.hint svg {
+  width: 250px;
+  height: auto;
+}
+
+@keyframes hintSlideIn {
+  from {
+    transform: translateX(200%) translateY(-120%);
+  }
 }
