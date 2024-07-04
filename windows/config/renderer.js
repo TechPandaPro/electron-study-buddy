@@ -4,6 +4,7 @@
   const questionsBody = document.querySelector("#questions tbody");
   const flipQuestionsBtn = document.getElementById("flipQuestionsBtn");
   const saveBtn = document.getElementById("saveBtn");
+  const saveBtnCheck = document.getElementById("saveBtnCheck");
   const quizDemoBtn = document.getElementById("quizDemoBtn");
 
   const popQuizzesEnabledElem = document.getElementById("popQuizzesEnabled");
@@ -62,7 +63,10 @@
     questionInput.addEventListener("input", checkValues);
     answerInput.addEventListener("input", checkValues);
 
-    removeBtn.addEventListener("click", () => newRow.remove());
+    removeBtn.addEventListener("click", () => {
+      newRow.remove();
+      checkNeedsSave();
+    });
 
     questionsBody.appendChild(newRow);
 
@@ -113,12 +117,21 @@
     checkNeedsSave();
   });
 
+  let saveBtnCheckTimeout = null;
+
   saveBtn.addEventListener("click", async () => {
     const dataToSave = retrieveDataToSave(true);
     await electronStore.set("popQuizConfig", dataToSave.popQuizConfig);
     await electronStore.set("questions", dataToSave.questions);
     await updateSavedCachedData(dataToSave);
     checkNeedsSave();
+    saveBtnCheck.dataset.show = true;
+
+    if (saveBtnCheckTimeout) clearTimeout(saveBtnCheckTimeout);
+    saveBtnCheckTimeout = setTimeout(() => {
+      if (saveBtnCheck.dataset.show) delete saveBtnCheck.dataset.show;
+      saveBtnCheckTimeout = null;
+    }, 1250);
   });
 
   function retrieveSavedCachedData() {
@@ -180,6 +193,9 @@
   document.addEventListener("input", checkNeedsSave);
 
   function checkNeedsSave() {
+    if (saveBtnCheckTimeout) clearTimeout(saveBtnCheckTimeout);
+    if (saveBtnCheck.dataset.show) delete saveBtnCheck.dataset.show;
+
     const oldData = JSON.stringify(retrieveSavedCachedData());
     const newData = JSON.stringify(retrieveDataToSave());
 
