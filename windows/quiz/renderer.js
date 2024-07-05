@@ -8,42 +8,53 @@
   const submitBtn = document.getElementById("submitBtn");
   const unsureBtn = document.getElementById("unsureBtn");
 
-  const question = questions[getRandomInt(0, questions.length)];
+  let question;
+  newQuestion();
 
-  questionElem.innerText = question.question;
+  // TODO: when clicking either button, check if the input is focused, and if so, focus it again afterwards
 
   answerElem.addEventListener("keydown", (e) => {
     if (e.key === "Enter") submitBtn.click();
   });
 
-  createAlert(
-    `Not quite! If you remember the answer, feel free to try again. Otherwise, click "I'm Unsure" to learn the answer.`
-  );
-
   submitBtn.addEventListener("click", () => {
+    answerElem.focus();
+
     // TODO: handle correct/incorrect answers
     const providedAnswer = answerElem.value;
     if (providedAnswer === question.answer) {
       // TODO: consider animation for removing this. maybe this could be a more general animation, e.g. fading the entire question page
       const hint = document.querySelector(".hint");
       if (hint) hint.remove();
+
+      answerElem.value = "";
+      newQuestion();
+
       // alert("correct");
     } else {
-      createAlert("Not quite!");
       const hint = document.querySelector(".hint");
       if (hint) {
+        createAlert(`Not quite! Check the hint for the answer!`);
         hint.classList.add("emphasized");
         hint.addEventListener(
           "animationend",
           () => hint.classList.remove("emphasized"),
           true
         );
+      } else {
+        createAlert(
+          `Not quite! If you remember the answer, feel free to try again. Otherwise, click "I'm Unsure" to learn the answer.`
+        );
       }
-      // alert("incorrect");
+
+      // TODO: make this configurable (whether or not it empties after incorrect)
+      answerElem.value = "";
     }
   });
 
   unsureBtn.addEventListener("click", () => {
+    answerElem.focus();
+
     // TODO: handle unsure button
     // alert("coming soon");
 
@@ -84,15 +95,46 @@
       document.body.append(alertsContainer);
     }
 
+    const alertWrapperElem = document.createElement("div");
+    alertWrapperElem.classList.add("alertWrapper");
+    alertWrapperElem.classList.add("animIn");
+    alertWrapperElem.addEventListener("transitionend", () => {
+      alertWrapperElem.classList.remove("animIn");
+      alertWrapperElem.style.removeProperty("height");
+    });
+
     const alertElem = document.createElement("div");
     alertElem.classList.add("alert");
-    alertElem.innerHTML = `
-      <div class="alertText"></div>
-      <div class="alertTime"></div>
-    `;
-    const alertElemText = alertElem.querySelector(".alertText");
-    alertElemText.innerText = text;
-    alertsContainer.appendChild(alertElem);
+
+    const alertTextElem = document.createElement("div");
+    alertTextElem.classList.add("alertText");
+    alertTextElem.innerText = text;
+
+    const alertTimeElem = document.createElement("div");
+    alertTimeElem.classList.add("alertTime");
+    alertTimeElem.addEventListener(
+      "animationend",
+      () => {
+        alertWrapperElem.addEventListener("transitionend", () =>
+          alertWrapperElem.remove()
+        );
+        alertWrapperElem.classList.add("animOut");
+      },
+      { once: true }
+    );
+
+    alertElem.append(alertTextElem, alertTimeElem);
+
+    alertsContainer.appendChild(alertWrapperElem);
+
+    alertWrapperElem.appendChild(alertElem);
+    alertWrapperElem.style.height = `${alertElem.offsetHeight}px`;
+  }
+
+  // TODO: prevent duplicates in one session
+  function newQuestion() {
+    question = questions[getRandomInt(0, questions.length)];
+    questionElem.innerText = question.question;
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random

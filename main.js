@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, ipcMain } = require("electron");
+const { app, BrowserWindow, Tray, dialog, ipcMain } = require("electron");
 const Store = require("electron-store");
 const path = require("node:path");
 
@@ -7,6 +7,8 @@ if (process.platform !== "darwin") throw new Error("Platform not supported");
 let tray;
 let configWin;
 let quizWin;
+
+// TODO: set app icon ? (this might not be done until the application packaging stage)
 
 const createWindows = () => {
   // TODO: set backgroundColor on both windows (should match whatever is in CSS)
@@ -42,7 +44,15 @@ const createWindows = () => {
   quizWin.setAlwaysOnTop(true, "floating");
   quizWin.on("close", (e) => {
     // TODO: figure out how window closing should work for quiz - maybe prevent closing but allow quitting? (use before-quit https://www.electronjs.org/docs/latest/api/app)
-    e.preventDefault();
+    // FIXME: ^ currently, when closing quizWin, it does not re-open
+    const response = dialog.showMessageBoxSync(quizWin, {
+      type: "question",
+      buttons: ["Yes", "No"],
+      title: "Confirm Exit",
+      message:
+        "Are you sure you want to exit this quiz session? You can always begin a new session later in your Study Buddy Dashboard.",
+    });
+    if (response === 1) e.preventDefault();
   });
   quizWin.loadFile("windows/quiz/index.html");
 

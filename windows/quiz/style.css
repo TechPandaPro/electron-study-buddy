@@ -29,15 +29,43 @@ h1 {
 }
 
 .alertsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  gap: 10px;
   position: absolute;
   bottom: 20px;
   width: 65%;
 }
 
+.alertWrapper {
+  position: relative;
+}
+
+.alertWrapper.animIn {
+  height: 0;
+  transition: height 0.2s;
+  animation: animMarginTop 0.2s;
+}
+
+.alertWrapper.animIn .alert {
+  position: absolute;
+  bottom: 0;
+}
+
+.alertWrapper.animOut {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
 .alert {
-  background-color: rgb(0 128 0 / 0.1);
+  width: 100%;
+  /* background-color: rgb(0 128 0 / 0.1); */
+  background-color: rgb(2, 69, 124);
   border: 2px solid rgb(118 118 118);
   border-radius: 6px;
+  animation: alertSlideIn 0.2s;
 }
 
 .alertText {
@@ -232,5 +260,21 @@ h1 {
 @keyframes alertTimeShrink {
   to {
     transform: scaleX(0);
+  }
+}
+
+@keyframes alertSlideIn {
+  from {
+    transform: translateY(150%);
+  }
+}
+
+@keyframes animMarginTop {
+  from {
+    margin-top: -10px;
+  }
+
+  to {
+    margin-top: 0;
   }
 }
