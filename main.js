@@ -15,44 +15,15 @@ let tray;
 let configWin;
 let quizWin;
 
+// whether the application is currently being quit
+let quitting = false;
+
+// whether the config (dashboard) is unsaved
+let configNeedsSave = false;
+
 // TODO: set app icon ? (this might not be done until the application packaging stage)
 
 const createWindows = () => {
-  openConfig();
-
-  // icon from https://flowbite.com/
-  tray = new Tray(path.join(__dirname, "icon.png"));
-  tray.on("click", () => {
-    console.log("Tray clicked");
-    setQuizPosition();
-  });
-};
-
-app.on("window-all-closed", () => {
-  console.log("All windows closed");
-});
-
-app.whenReady().then(() => {
-  const store = new Store();
-
-  ipcMain.handle("electron-store-set", (_event, key, value) =>
-    store.set(key, value)
-  );
-  ipcMain.handle("electron-store-get", (_event, key) => store.get(key));
-  ipcMain.handle("electron-store-delete", (_event, key) => store.delete(key));
-  ipcMain.handle("quiz-start", () => startQuiz());
-
-  createWindows();
-
-  app.on("activate", () => {
-    // console.log("activated");
-    if (!configWin || configWin.isDestroyed()) openConfig();
-    // if (configWin && !configWin.isVisible()) configWin.show();
-    // if (BrowserWindow.getAllWindows().length === 0) createWindows();
-  });
-});
-
-function openConfig() {
   // TODO: set backgroundColor on both windows (should match whatever is in CSS)
   configWin = new BrowserWindow({
     width: 800,
@@ -68,12 +39,61 @@ function openConfig() {
   // configWin.openDevTools({ mode: "detach" });
   configWin.on("close", (e) => {
     // TODO: figure out window closing (see below in other listener)
-    // e.preventDefault();
-    // configWin.hide();
+
+    if (configNeedsSave) {
+      const response = dialog.showMessageBoxSync(configWin, {
+        type: "question",
+        buttons: ["Yes", "No"],
+        title: "Confirm Exit",
+        message:
+          "You have unsaved changes! Are you sure you want to close your dashboard without saving?",
+      });
+      if (response === 1) e.preventDefault();
+    } else if (!quitting) {
+      e.preventDefault();
+      configWin.hide();
+    }
     // TODO: add alert when closing if unsaved (look into various methods for this)
   });
   configWin.loadFile("windows/config/index.html");
-}
+
+  // icon from https://flowbite.com/
+  tray = new Tray(path.join(__dirname, "icon.png"));
+  tray.on("click", () => {
+    console.log("Tray clicked");
+    setQuizPosition();
+  });
+};
+
+app.on("before-quit", () => (quitting = true));
+
+app.on("window-all-closed", () => {
+  console.log("All windows closed");
+});
+
+app.whenReady().then(() => {
+  const store = new Store();
+
+  ipcMain.handle("electron-store-set", (_event, key, value) =>
+    store.set(key, value)
+  );
+  ipcMain.handle("electron-store-get", (_event, key) => store.get(key));
+  ipcMain.handle("electron-store-delete", (_event, key) => store.delete(key));
+  ipcMain.handle("quiz-start", () => startQuiz());
+  ipcMain.handle(
+    "set-needs-save",
+    (_event, needsSave) => (configNeedsSave = needsSave)
+  );
+
+  createWindows();
+
+  app.on("activate", () => {
+    // console.log("activated");
+    // if (!configWin || configWin.isDestroyed()) openConfig();
+    if (configWin && !configWin.isVisible()) configWin.show();
+    // if (BrowserWindow.getAllWindows().length === 0) createWindows();
+  });
+});
 
 function setQuizPosition() {
   if (!quizWin || !tray) return;

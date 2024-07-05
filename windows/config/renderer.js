@@ -1,7 +1,8 @@
 (async () => {
   // FIXME: consider adding class to body while loading that disables transitions
 
-  const electronStore = window.electronAPI.electronStore;
+  const electronAPI = window.electronAPI;
+  const electronStore = electronAPI.electronStore;
 
   const questionsBody = document.querySelector("#questions tbody");
   const flipQuestionsBtn = document.getElementById("flipQuestionsBtn");
@@ -189,7 +190,7 @@
     return { popQuizConfig, questions };
   }
 
-  quizDemoBtn.addEventListener("click", () => window.electronAPI.startQuiz());
+  quizDemoBtn.addEventListener("click", () => electronAPI.startQuiz());
 
   // when any input is changed, check if the save button needs to be emphasized
   document.addEventListener("input", checkNeedsSave);
@@ -205,6 +206,8 @@
 
     if (needsSave) saveBtn.dataset.needsSave = true;
     else delete saveBtn.dataset.needsSave;
+
+    electronAPI.setNeedsSave(needsSave);
   }
 
   updatePopQuizIntervalEnabled();
