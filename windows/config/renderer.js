@@ -1,4 +1,6 @@
 (async () => {
+  // FIXME: consider adding class to body while loading that disables transitions
+
   const electronStore = window.electronAPI.electronStore;
 
   const questionsBody = document.querySelector("#questions tbody");
