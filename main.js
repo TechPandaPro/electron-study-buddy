@@ -40,6 +40,8 @@ const createWindows = () => {
   configWin.on("close", (e) => {
     // TODO: figure out window closing (see below in other listener)
 
+    let interceptClose = !quitting && !configNeedsSave;
+
     if (configNeedsSave) {
       const response = dialog.showMessageBoxSync(configWin, {
         type: "question",
@@ -48,11 +50,16 @@ const createWindows = () => {
         message:
           "You have unsaved changes! Are you sure you want to close your dashboard without saving?",
       });
+      if (!quitting && response === 0) interceptClose = true;
       if (response === 1) e.preventDefault();
-    } else if (!quitting) {
+    }
+
+    if (interceptClose) {
       e.preventDefault();
+      configWin.webContents.send("reset-unsaved");
       configWin.hide();
     }
+
     // TODO: add alert when closing if unsaved (look into various methods for this)
   });
   configWin.loadFile("windows/config/index.html");

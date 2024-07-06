@@ -19,4 +19,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   startQuiz: () => ipcRenderer.invoke("quiz-start"),
   setNeedsSave: (needsSave) => ipcRenderer.invoke("set-needs-save", needsSave),
+  onResetUnsaved: (callback) =>
+    ipcRenderer.on("reset-unsaved", () => callback()),
 });

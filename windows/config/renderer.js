@@ -26,13 +26,7 @@
   let questions;
   await updateSavedCachedData();
 
-  popQuizzesEnabledElem.checked = popQuizConfig.enabled;
-  popQuizIntervalCountElem.value = popQuizConfig.intervalCount;
-  popQuizIntervalTimeElem.value = popQuizConfig.intervalTime;
-
-  for (const question of questions) addRow(question.question, question.answer);
-
-  addRow();
+  resetDisplayedConfig();
 
   function addRow(question, answer) {
     const newRow = document.createElement("tr");
@@ -190,7 +184,27 @@
     return { popQuizConfig, questions };
   }
 
+  function resetDisplayedConfig() {
+    popQuizzesEnabledElem.checked = popQuizConfig.enabled;
+    popQuizIntervalCountElem.value = popQuizConfig.intervalCount;
+    popQuizIntervalTimeElem.value = popQuizConfig.intervalTime;
+
+    for (const row of document.querySelectorAll(".questionInputs"))
+      row.remove();
+
+    for (const question of questions)
+      addRow(question.question, question.answer);
+
+    addRow();
+  }
+
   quizDemoBtn.addEventListener("click", () => electronAPI.startQuiz());
+
+  electronAPI.onResetUnsaved(() => {
+    console.log("Reset");
+    resetDisplayedConfig();
+    checkNeedsSave();
+  });
 
   // when any input is changed, check if the save button needs to be emphasized
   document.addEventListener("input", checkNeedsSave);
