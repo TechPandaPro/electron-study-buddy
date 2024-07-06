@@ -61,7 +61,6 @@ h1 {
 
 .alert {
   width: 100%;
-  /* background-color: rgb(0 128 0 / 0.1); */
   background-color: rgb(2, 69, 124);
   border: 2px solid rgb(118 118 118);
   border-radius: 6px;
@@ -111,7 +110,6 @@ h1 {
   width: 300px;
 }
 
-/* FIXME: cursor should only be pointer when button is enabled (also, styling for :disabled is needed) */
 .responseBtn {
   flex-grow: 1;
   flex-basis: 0;
@@ -119,11 +117,7 @@ h1 {
   padding: 7px 15px;
   color: inherit;
   font: inherit;
-  /* border: 2px solid rgb(64, 64, 64); */
   border: 2px solid rgb(15 15 15);
-  /* border-width: 2px;
-  border-color: rgb(0 0 0);
-  border-style: outset; */
   border-radius: 8px;
   transition: box-shadow 0.1s, background-color 0.1s, color 0.2s;
 }
@@ -146,10 +140,6 @@ h1 {
   border: 2px solid rgb(15 15 15 / 0.5);
   color: rgb(255 255 255 / 0.5);
 }
-
-/* .responseBtn:active {
-  border-style: inset;
-} */
 
 .hintWrapper {
   position: absolute;

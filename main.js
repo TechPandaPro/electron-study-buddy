@@ -18,12 +18,6 @@ let quizWin;
 // whether the application is currently being quit
 let quitting = false;
 
-// // if noCloseConfig = true, configWin will not be closed
-// let noCloseConfig = false;
-
-// // if quizCanClose = true, confirmation box will not be shown when closing quizWin
-// let quizCanClose = false;
-
 // whether the config (dashboard) is unsaved
 let configNeedsSave = false;
 
@@ -34,7 +28,7 @@ let configNeedsSave = false;
 const createWindows = () => {
   configWin = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 700,
     backgroundColor: nativeTheme.shouldUseDarkColors
       ? "rgb(10, 10, 10)"
       : "rgb(255, 255, 255)",
@@ -45,16 +39,6 @@ const createWindows = () => {
   // TODO: remove dev tools - this is here just for dev testing
   configWin.openDevTools({ mode: "detach" });
   configWin.on("close", (e) => {
-    // TODO: figure out window closing (see below in other listener)
-
-    // if (noCloseConfig) {
-    //   noCloseConfig = false;
-    //   e.preventDefault();
-    //   return;
-    // }
-
-    // let interceptClose = !quitting && !configNeedsSave;
-
     let hideForClose = !configNeedsSave;
 
     if (configNeedsSave) {
@@ -77,24 +61,8 @@ const createWindows = () => {
         configWin.hide();
       }
       if (quitting && quizWin && !quizWin.isDestroyed()) quizWin.close();
-
-      // if (quitting) {
-      //   if (quizWin && !quizWin.isDestroyed()) quizWin.close();
-      //   else app.quit();
-      // }
     }
-
-    // if (interceptClose) {
-    //   e.preventDefault();
-    //   configWin.webContents.send("reset-unsaved");
-    //   configWin.hide();
-    // }
-
-    // TODO: add alert when closing if unsaved (look into various methods for this)
   });
-  // configWin.on("hide", () => {
-  //   if (quitting && quizWin && !quizWin.isDestroyed()) quizWin.close();
-  // });
   configWin.on("closed", () => {
     if (!quizWin || quizWin.isDestroyed()) app.quit();
   });
@@ -182,21 +150,14 @@ function startQuiz() {
     backgroundColor: "rgb(2, 62, 138)",
     // frame: false,
     resizable: false,
+    // TODO: determine whether quizWin should be movable or not
     // movable: false,
     webPreferences: {
       preload: path.join(__dirname, "windows", "quiz", "preload.js"),
     },
-    // TODO: remove show: false - this is here just so it's out of the way for now
-    // show: false,
   });
   quizWin.setAlwaysOnTop(true, "floating");
   quizWin.on("close", (e) => {
-    // TODO: figure out how window closing should work for quiz - maybe prevent closing but allow quitting? (use before-quit https://www.electronjs.org/docs/latest/api/app)
-    // FIXME: ^ currently, when closing quizWin, it does not re-open
-    // if (quizCanClose) {
-    //   quizCanClose = false;
-    //   return;
-    // }
     const response = dialog.showMessageBoxSync(quizWin, {
       type: "question",
       buttons: ["Yes", "No"],
@@ -204,18 +165,6 @@ function startQuiz() {
       message:
         "Are you sure you want to exit this quiz session? You can always begin a new session later in your Study Buddy Dashboard.",
     });
-    // if (response === 0) {
-    //   e.preventDefault();
-    //   quizCanClose = true;
-    //   quizWin.close();
-    // }
-    // if (response === 1) {
-    //   e.preventDefault();
-    //   noCloseConfig = true;
-    // }
-    // if (response === 0) {
-    //   if (quitting) app.quit();
-    // } else if (response === 1) e.preventDefault();
     if (response === 1) e.preventDefault();
   });
   quizWin.on("closed", () => {
@@ -224,6 +173,4 @@ function startQuiz() {
   quizWin.loadFile("windows/quiz/index.html");
 
   setQuizPosition();
-
-  // quizWin.show();
 }

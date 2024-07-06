@@ -236,6 +236,4 @@
     const inputElems = popQuizIntervalContainer.querySelectorAll("select");
     for (const inputElem of inputElems) inputElem.disabled = !popQuizzesEnabled;
   }
-
-  // window.electronAPI.startQuiz();
 })();

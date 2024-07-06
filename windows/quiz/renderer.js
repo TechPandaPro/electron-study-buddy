@@ -11,8 +11,6 @@
   let question;
   newQuestion();
 
-  // TODO: when clicking either button, check if the input is focused, and if so, focus it again afterwards
-
   answerElem.addEventListener("keydown", (e) => {
     if (e.key === "Enter") submitBtn.click();
   });
@@ -20,7 +18,6 @@
   submitBtn.addEventListener("click", () => {
     answerElem.focus();
 
-    // TODO: handle correct/incorrect answers
     const providedAnswer = answerElem.value;
     if (providedAnswer === question.answer) {
       // TODO: consider animation for removing this. maybe this could be a more general animation, e.g. fading the entire question page
@@ -30,7 +27,8 @@
       answerElem.value = "";
       newQuestion();
 
-      // alert("correct");
+      // TODO: consider various ways to display "correct" message
+      createAlert("Correct!");
     } else {
       const hint = document.querySelector(".hint");
       if (hint) {
@@ -54,9 +52,6 @@
 
   unsureBtn.addEventListener("click", () => {
     answerElem.focus();
-
-    // TODO: handle unsure button
-    // alert("coming soon");
 
     unsureBtn.disabled = true;
 
