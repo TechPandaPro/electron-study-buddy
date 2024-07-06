@@ -5,6 +5,7 @@ const {
   dialog,
   ipcMain,
   nativeTheme,
+  powerMonitor,
 } = require("electron");
 const Store = require("electron-store");
 const path = require("node:path");
@@ -14,6 +15,12 @@ if (process.platform !== "darwin") throw new Error("Platform not supported");
 let tray;
 let configWin;
 let quizWin;
+
+// cached value of persistent popQuizConfig
+let popQuizConfig;
+
+// an array of all the info on when a quiz should randomly appear (timestamps etc.)
+let allAppearAt = [];
 
 // whether the application is currently being quit
 let quitting = false;
@@ -49,7 +56,6 @@ const createWindows = () => {
         message:
           "You have unsaved changes! Are you sure you want to close your dashboard without saving?",
       });
-      // if (!quitting && response === 0) interceptClose = true;
       if (response === 0) hideForClose = true;
       else if (response === 1) e.preventDefault();
     }
@@ -88,24 +94,22 @@ app.on("before-quit", (e) => {
     // if configWin is closed successfully, then it will handle closing quizWin
     if (configWin && !configWin.isDestroyed()) configWin.close();
   }
-
-  // if (quizWin && !quizWin.isDestroyed()) quizWin.close();
-  // if (quizWin && !quizWin.isDestroyed()) return;
-  // if (configWin && !configWin.isDestroyed()) configWin.close();
-
-  // quitting = true;
 });
 
 app.on("window-all-closed", () => {
   console.log("All windows closed");
 });
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const store = new Store();
 
-  ipcMain.handle("electron-store-set", (_event, key, value) =>
-    store.set(key, value)
-  );
+  ipcMain.handle("electron-store-set", (_event, key, value) => {
+    if (key === "popQuizConfig") {
+      popQuizConfig = value;
+      createRandomAppears();
+    }
+    store.set(key, value);
+  });
   ipcMain.handle("electron-store-get", (_event, key) => store.get(key));
   ipcMain.handle("electron-store-delete", (_event, key) => store.delete(key));
   ipcMain.handle("quiz-start", () => startQuiz());
@@ -117,12 +121,53 @@ app.whenReady().then(() => {
   createWindows();
 
   app.on("activate", () => {
-    // console.log("activated");
-    // if (!configWin || configWin.isDestroyed()) openConfig();
     if (configWin && !configWin.isVisible()) configWin.show();
-    // if (BrowserWindow.getAllWindows().length === 0) createWindows();
   });
+
+  popQuizConfig = (await store.get("popQuizConfig")) ?? {
+    enabled: false,
+    intervalCount: 2,
+    intervalTime: 1,
+  };
+
+  createRandomAppears();
 });
+
+function createRandomAppears() {
+  for (const appearAt of allAppearAt) clearTimeout(appearAt.timeout);
+  allAppearAt.splice(0, allAppearAt.length);
+
+  if (popQuizConfig.enabled)
+    for (let i = 0; i < popQuizConfig.intervalCount; i++) createRandomAppear();
+}
+
+function createRandomAppear() {
+  const delay = getRandomInt(
+    0.1 * 60 * 1000, // 1 minute min
+    popQuizConfig.intervalTime * 60 * 60 * 1000 // {intervalTime} hours max
+  );
+
+  const appearAtObj = {};
+  appearAtObj.stamp = Date.now() + delay;
+  appearAtObj.appeared = false;
+
+  appearAtObj.timeout = setTimeout(() => {
+    if (Date.now() >= appearAtObj.stamp) {
+      allAppearAt.splice(allAppearAt.indexOf(appearAtObj), 1);
+      createRandomAppear();
+
+      const delay = Date.now() - appearAtObj.stamp;
+      if (delay > 5000) return;
+
+      const idleState = powerMonitor.getSystemIdleState(180);
+      if (idleState !== "active") return;
+
+      if (!quizWin || quizWin.isDestroyed()) startQuiz();
+    }
+  }, delay);
+
+  allAppearAt.push(appearAtObj);
+}
 
 function setQuizPosition() {
   if (!quizWin || !tray) return;
@@ -173,4 +218,12 @@ function startQuiz() {
   quizWin.loadFile("windows/quiz/index.html");
 
   setQuizPosition();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+// min is inclusive and max is exclusive
+function getRandomInt(min, max) {
+  const minCeiled = Math.ceil(min);
+  const maxFloored = Math.floor(max);
+  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
 }

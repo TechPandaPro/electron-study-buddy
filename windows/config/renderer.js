@@ -141,7 +141,7 @@
       popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {
         enabled: false,
         intervalCount: 2,
-        time: 1,
+        intervalTime: 1,
       };
 
     if (data.questions) questions = data.questions;
