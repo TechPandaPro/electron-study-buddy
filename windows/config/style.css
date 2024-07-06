@@ -42,7 +42,7 @@ h1:first-child {
 #saveBtnContainer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 #saveBtn[data-needs-save] {
@@ -60,7 +60,7 @@ h1:first-child {
 #saveBtnCheck {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 
   /* color: rgb(38 163 38); */
   color: rgb(128 128 128);
@@ -78,6 +78,16 @@ h1:first-child {
 #saveBtnCheck svg {
   width: 15px;
   height: 15px;
+}
+
+#configContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#questionsWrapperOuter {
+  display: flex;
 }
 
 #questionsWrapper {
@@ -267,6 +277,12 @@ table#questions tbody tr:last-of-type .removeBtn {
   height: 12px;
   fill: blue;
   stroke: blue;
+}
+
+#quizRandomnessConfigContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 #popQuizIntervalContainer {

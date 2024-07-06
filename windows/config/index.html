@@ -25,11 +25,12 @@
       <h2>Study</h2>
       <button class="styledButton" id="quizDemoBtn">Quiz Demo</button>
       <h2>Configuration</h2>
-      <div id="questionsWrapperOuter">
-        <div id="questionsWrapper">
-          <button id="flipQuestionsBtn" aria-label="Flip Questions/Answers">
-            <!-- prettier-ignore -->
-            <svg width="137" height="137" viewBox="0 0 137 137" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div id="configContainer">
+        <div id="questionsWrapperOuter">
+          <div id="questionsWrapper">
+            <button id="flipQuestionsBtn" aria-label="Flip Questions/Answers">
+              <!-- prettier-ignore -->
+              <svg width="137" height="137" viewBox="0 0 137 137" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M101 10L127 36" stroke="currentColor" stroke-width="17" stroke-linecap="round"/>
               <path d="M101 62L127 36" stroke="currentColor" stroke-width="17" stroke-linecap="round"/>
               <path d="M10 48C10 48 27.5 36.0003 56.5 36.0001C85.5 35.9999 126.5 36.0001 126.5 36.0001" stroke="currentColor" stroke-width="17" stroke-linecap="round"/>
@@ -37,47 +38,52 @@
               <path d="M36 76L10 102" stroke="currentColor" stroke-width="17" stroke-linecap="round"/>
               <path d="M127 90C127 90 109.5 102 80.5 102C51.5 102 10.5 102 10.5 102" stroke="currentColor" stroke-width="17" stroke-linecap="round"/>
             </svg>
-          </button>
-          <table id="questions">
-            <thead>
-              <tr>
-                <th><div class="thInner">Question</div></th>
-                <th><div class="thInner">Answer</div></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+            </button>
+            <table id="questions">
+              <thead>
+                <tr>
+                  <th><div class="thInner">Question</div></th>
+                  <th><div class="thInner">Answer</div></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <!-- TODO: better formatting, save these with JS, better options, etc -->
-      <input type="checkbox" id="popQuizzesEnabled" />
-      <label for="popQuizzesEnabled">Begin pop quizzes randomly</label>
-      <div id="popQuizIntervalContainer">
-        <span>Start pop quizzes </span>
-        <select id="popQuizIntervalCount">
-          <option value="1">once</option>
-          <option value="2">twice</option>
-          <option value="5">5 times</option>
-          <option value="10">10 times</option>
-          <option value="20">20 times</option>
-        </select>
-        <span> per </span>
-        <select id="popQuizIntervalTime">
-          <option value="1">hour</option>
-          <option value="6">6 hours</option>
-          <option value="12">12 hours</option>
-        </select>
-      </div>
-      <!-- -->
-      <div id="saveBtnContainer">
-        <button class="styledButton" id="saveBtn">Save</button>
-        <div id="saveBtnCheck">
-          <!-- prettier-ignore -->
-          <svg width="135" height="135" viewBox="0 0 135 135" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- TODO: better formatting, save these with JS, better options, etc -->
+        <div id="quizRandomnessConfigContainer">
+          <div class="popQuizzesEnabledContainer">
+            <input type="checkbox" id="popQuizzesEnabled" />
+            <label for="popQuizzesEnabled">Begin pop quizzes randomly</label>
+          </div>
+          <div id="popQuizIntervalContainer">
+            <span>Start pop quizzes </span>
+            <select id="popQuizIntervalCount">
+              <option value="1">once</option>
+              <option value="2">twice</option>
+              <option value="5">5 times</option>
+              <option value="10">10 times</option>
+              <option value="20">20 times</option>
+            </select>
+            <span> per </span>
+            <select id="popQuizIntervalTime">
+              <option value="1">hour</option>
+              <option value="6">6 hours</option>
+              <option value="12">12 hours</option>
+            </select>
+          </div>
+        </div>
+        <!-- -->
+        <div id="saveBtnContainer">
+          <button class="styledButton" id="saveBtn">Save</button>
+          <div id="saveBtnCheck">
+            <!-- prettier-ignore -->
+            <svg width="135" height="135" viewBox="0 0 135 135" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M13 72L47 106" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
             <path d="M47 106L123 30" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
           </svg>
-          <span>Saved</span>
+            <span>Saved</span>
+          </div>
         </div>
       </div>
     </div>

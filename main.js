@@ -18,13 +18,20 @@ let quizWin;
 // whether the application is currently being quit
 let quitting = false;
 
+// // if noCloseConfig = true, configWin will not be closed
+// let noCloseConfig = false;
+
+// // if quizCanClose = true, confirmation box will not be shown when closing quizWin
+// let quizCanClose = false;
+
 // whether the config (dashboard) is unsaved
 let configNeedsSave = false;
 
 // TODO: set app icon ? (this might not be done until the application packaging stage)
 
+// TODO: consider adding option to reposition default quizWin position
+
 const createWindows = () => {
-  // TODO: set backgroundColor on both windows (should match whatever is in CSS)
   configWin = new BrowserWindow({
     width: 800,
     height: 600,
@@ -36,11 +43,19 @@ const createWindows = () => {
     },
   });
   // TODO: remove dev tools - this is here just for dev testing
-  // configWin.openDevTools({ mode: "detach" });
+  configWin.openDevTools({ mode: "detach" });
   configWin.on("close", (e) => {
     // TODO: figure out window closing (see below in other listener)
 
-    let interceptClose = !quitting && !configNeedsSave;
+    // if (noCloseConfig) {
+    //   noCloseConfig = false;
+    //   e.preventDefault();
+    //   return;
+    // }
+
+    // let interceptClose = !quitting && !configNeedsSave;
+
+    let hideForClose = !configNeedsSave;
 
     if (configNeedsSave) {
       const response = dialog.showMessageBoxSync(configWin, {
@@ -50,17 +65,38 @@ const createWindows = () => {
         message:
           "You have unsaved changes! Are you sure you want to close your dashboard without saving?",
       });
-      if (!quitting && response === 0) interceptClose = true;
-      if (response === 1) e.preventDefault();
+      // if (!quitting && response === 0) interceptClose = true;
+      if (response === 0) hideForClose = true;
+      else if (response === 1) e.preventDefault();
     }
 
-    if (interceptClose) {
-      e.preventDefault();
-      configWin.webContents.send("reset-unsaved");
-      configWin.hide();
+    if (hideForClose) {
+      if (!quitting || (quizWin && !quizWin.isDestroyed())) {
+        e.preventDefault();
+        configWin.webContents.send("reset-unsaved");
+        configWin.hide();
+      }
+      if (quitting && quizWin && !quizWin.isDestroyed()) quizWin.close();
+
+      // if (quitting) {
+      //   if (quizWin && !quizWin.isDestroyed()) quizWin.close();
+      //   else app.quit();
+      // }
     }
+
+    // if (interceptClose) {
+    //   e.preventDefault();
+    //   configWin.webContents.send("reset-unsaved");
+    //   configWin.hide();
+    // }
 
     // TODO: add alert when closing if unsaved (look into various methods for this)
+  });
+  // configWin.on("hide", () => {
+  //   if (quitting && quizWin && !quizWin.isDestroyed()) quizWin.close();
+  // });
+  configWin.on("closed", () => {
+    if (!quizWin || quizWin.isDestroyed()) app.quit();
   });
   configWin.loadFile("windows/config/index.html");
 
@@ -72,7 +108,25 @@ const createWindows = () => {
   });
 };
 
-app.on("before-quit", () => (quitting = true));
+app.on("before-quit", (e) => {
+  if (
+    (configWin && !configWin.isDestroyed() && configWin.isVisible()) ||
+    (quizWin && !quizWin.isDestroyed())
+  ) {
+    e.preventDefault();
+
+    quitting = true;
+
+    // if configWin is closed successfully, then it will handle closing quizWin
+    if (configWin && !configWin.isDestroyed()) configWin.close();
+  }
+
+  // if (quizWin && !quizWin.isDestroyed()) quizWin.close();
+  // if (quizWin && !quizWin.isDestroyed()) return;
+  // if (configWin && !configWin.isDestroyed()) configWin.close();
+
+  // quitting = true;
+});
 
 app.on("window-all-closed", () => {
   console.log("All windows closed");
@@ -139,6 +193,10 @@ function startQuiz() {
   quizWin.on("close", (e) => {
     // TODO: figure out how window closing should work for quiz - maybe prevent closing but allow quitting? (use before-quit https://www.electronjs.org/docs/latest/api/app)
     // FIXME: ^ currently, when closing quizWin, it does not re-open
+    // if (quizCanClose) {
+    //   quizCanClose = false;
+    //   return;
+    // }
     const response = dialog.showMessageBoxSync(quizWin, {
       type: "question",
       buttons: ["Yes", "No"],
@@ -146,7 +204,22 @@ function startQuiz() {
       message:
         "Are you sure you want to exit this quiz session? You can always begin a new session later in your Study Buddy Dashboard.",
     });
+    // if (response === 0) {
+    //   e.preventDefault();
+    //   quizCanClose = true;
+    //   quizWin.close();
+    // }
+    // if (response === 1) {
+    //   e.preventDefault();
+    //   noCloseConfig = true;
+    // }
+    // if (response === 0) {
+    //   if (quitting) app.quit();
+    // } else if (response === 1) e.preventDefault();
     if (response === 1) e.preventDefault();
+  });
+  quizWin.on("closed", () => {
+    if (quitting) app.quit();
   });
   quizWin.loadFile("windows/quiz/index.html");
 
