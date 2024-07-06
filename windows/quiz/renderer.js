@@ -3,11 +3,15 @@
 
   const questions = (await electronStore.get(`questions`)) ?? [];
 
+  const questionNumElem = document.getElementById("questionNum");
   const questionElem = document.getElementById("question");
   const answerElem = document.getElementById("answerInput");
   const submitBtn = document.getElementById("submitBtn");
   const unsureBtn = document.getElementById("unsureBtn");
 
+  // TODO: make max questions configurable (& whether or not duplicates are allowed)
+  const maxQuestions = 5;
+  let questionNum = 0;
   let question;
   newQuestion();
 
@@ -24,11 +28,20 @@
       const hint = document.querySelector(".hint");
       if (hint) hint.remove();
 
-      answerElem.value = "";
-      newQuestion();
-
       // TODO: consider various ways to display "correct" message
       createAlert("Correct!");
+
+      // TODO: consider closing from main process (?)
+      if (questionNum === maxQuestions) {
+        // addConfetti();
+        // FIXME: add button (or preferably a whole new layout) for closing quiz, instead of using a timeout
+        // setTimeout(() => {
+        window.close();
+        // }, 5000);
+      } else {
+        answerElem.value = "";
+        newQuestion();
+      }
     } else {
       const hint = document.querySelector(".hint");
       if (hint) {
@@ -128,15 +141,102 @@
 
   // TODO: prevent duplicates in one session
   function newQuestion() {
+    questionNum++;
+    questionNumElem.innerText = `${questionNum}/${maxQuestions}`;
+
     question = questions[getRandomInt(0, questions.length)];
     questionElem.innerText = question.question;
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-  // min is inclusive and max is exclusive
+  // min is inclusive, max is exclusive
   function getRandomInt(min, max) {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+  }
+
+  // min is inclusive, max is inclusive
+  function getRandomIntInclusive(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
+  }
+
+  // min is inclusive, max is exclusive
+  function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function addConfetti() {
+    const confetti = [];
+    const addConfettiFor = 5000;
+    const addConfettiUntil = Date.now() + addConfettiFor;
+
+    const canvas = document.createElement("canvas");
+    canvas.classList.add("confettiCanvas");
+    canvas.width = document.body.offsetWidth;
+    canvas.height = document.body.offsetHeight;
+    document.body.append(canvas);
+
+    const ctx = canvas.getContext("2d");
+
+    window.requestAnimationFrame(draw);
+
+    // TODO: clear interval (and remove canvas) after confetti is cleared
+    setInterval(update, 16);
+
+    const gravity = 0.1;
+    const resistance = 0.99;
+
+    function update() {
+      // if (addConfettiUntil >= Date.now()) {
+      if (confetti.length < 70) {
+        const hue = `${getRandomInt(0, 360)}deg`;
+        const saturation = `${getRandomIntInclusive(70, 100)}%`;
+        const lightness = `${getRandomIntInclusive(40, 70)}%`;
+
+        const angleDeg = getRandomArbitrary(-90, 0);
+        const angleRad = angleDeg * (Math.PI / 180);
+
+        const speed = getRandomArbitrary(10, 15);
+
+        const xVel = Math.cos(angleRad) * speed;
+        const yVel = Math.sin(angleRad) * speed;
+
+        confetti.push({
+          x: 100 + getRandomInt(-80, 80),
+          y: canvas.height - 100 + getRandomInt(-80, 80),
+          width: 10,
+          height: 20,
+          color: `hsl(${hue} ${saturation} ${lightness})`,
+          xVel,
+          yVel,
+        });
+      }
+
+      for (const confetto of confetti) {
+        confetto.yVel += gravity;
+
+        confetto.xVel *= resistance;
+        confetto.yVel *= resistance;
+
+        confetto.x += confetto.xVel;
+        confetto.y += confetto.yVel;
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // fun fact: confetto is the singular of confetti :)
+      for (const confetto of confetti) {
+        ctx.fillStyle = confetto.color;
+        console.log(confetto.color);
+        ctx.fillRect(confetto.x, confetto.y, confetto.width, confetto.height);
+      }
+
+      window.requestAnimationFrame(draw);
+    }
   }
 })();
