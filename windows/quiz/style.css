@@ -116,15 +116,23 @@ h1 {
 }
 
 .responseBtn {
-  flex-grow: 1;
-  flex-basis: 0;
   background-color: transparent;
   padding: 7px 15px;
   color: inherit;
   font: inherit;
   border: 2px solid rgb(15 15 15);
   border-radius: 8px;
+  height: 45px;
   transition: box-shadow 0.1s, background-color 0.1s, color 0.2s;
+}
+
+#responseBtnsContainer .responseBtn {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.responseBtn.closeQuizBtn {
+  padding: 7px 35px;
 }
 
 .responseBtn:enabled {
@@ -212,6 +220,9 @@ h1 {
   position: absolute;
   top: 0;
   left: 0;
+
+  z-index: 1;
+  pointer-events: none;
 }
 
 @keyframes hintSlideIn {

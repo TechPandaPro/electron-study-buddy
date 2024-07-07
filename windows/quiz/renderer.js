@@ -33,7 +33,25 @@
 
       // TODO: consider closing from main process (?)
       if (questionNum === maxQuestions) {
+        // questionElem.remove();
+        // answerElem.remove();
+        // responseBtnsContainer.remove();
+        // questionNumElem.remove();
+
+        document.body.innerHTML = `
+          <div class="finishedText">You finished this pop quiz!</div>
+          <button class="responseBtn closeQuizBtn">Close</button>
+        `;
+
+        const closeQuizBtn = document.body.querySelector(".closeQuizBtn");
+
+        closeQuizBtn.addEventListener("click", () => {
+          // TODO: consider if this should be done from main process (?)
+          window.close();
+        });
+
         addConfetti();
+
         // FIXME: add button (or preferably a whole new layout) for closing quiz, instead of using a timeout
         // setTimeout(() => {
         // window.close();
@@ -197,12 +215,7 @@
 
     const angleSpaceBottom = 30;
 
-    // for (let i = 0; i < addConfettiCount; i++) generateConfetti();
-
     function update() {
-      // if (addConfettiUntil >= Date.now()) {
-      // if (confetti.length < 71) {
-      // if (addConfettiCount > confetti.length) generateConfetti();
       if (addConfettiUntil > Date.now()) generateConfetti(3);
 
       for (const confetto of confetti) {
@@ -231,9 +244,6 @@
         const existedFor = Date.now() - confetto.createdAt;
 
         const scale = getScaleForTime(existedFor);
-
-        // const scale = Math.abs(Math.cos(existedFor / 50));
-        console.log(existedFor);
 
         ctx.translate(confettoCenterX, confettoCenterY);
         ctx.rotate(confetto.rotation);
