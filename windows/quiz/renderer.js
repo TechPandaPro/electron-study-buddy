@@ -17,6 +17,9 @@
 
   let correctQuestions = 0;
 
+  // a used attempt is either a submitted correct/incorrect answer or a hint given
+  let attemptsUsed = 0;
+
   // TODO: make max questions configurable (& whether or not duplicates are allowed)
   const maxQuestions = 5;
   let questionNum = 0;
@@ -30,8 +33,6 @@
     }
   });
 
-  answerElem.addEventListener("input", checkSubmitDisabled);
-
   submitBtn.addEventListener("click", () => {
     answerElem.focus();
 
@@ -42,9 +43,14 @@
     // quizStats.totalQuestions++;
 
     const providedAnswer = answerElem.value;
-    if (providedAnswer === question.answer) {
+    if (!providedAnswer)
+      createAlert(
+        `Please provide an answer before submitting! Click "I'm Unsure" if you don't remember the answer.`
+      );
+    else if (providedAnswer === question.answer) {
       // quizStats.correctQuestions++;
-      correctQuestions++;
+      attemptsUsed++;
+      if (attemptsUsed === 1) correctQuestions++;
 
       // TODO: consider animation for removing this. maybe this could be a more general animation, e.g. fading the entire question page
       const hint = document.querySelector(".hint");
@@ -122,6 +128,7 @@
         newQuestion();
       }
     } else {
+      attemptsUsed++;
       const hint = document.querySelector(".hint");
       if (hint) {
         createAlert(`Not quite! Check the hint for the answer!`);
@@ -144,6 +151,8 @@
 
   unsureBtn.addEventListener("click", () => {
     answerElem.focus();
+
+    attemptsUsed++;
 
     unsureBtn.disabled = true;
 
@@ -171,10 +180,6 @@
   });
 
   answerElem.focus();
-
-  function checkSubmitDisabled() {
-    submitBtn.disabled = answerElem.value === "";
-  }
 
   function createAlert(text) {
     let alertsContainer = document.querySelector(".alertsContainer");
@@ -222,13 +227,14 @@
 
   // TODO: prevent duplicates in one session
   function newQuestion() {
+    attemptsUsed = 0;
+    unsureBtn.disabled = false;
+
     questionNum++;
     questionNumElem.innerText = `${questionNum}/${maxQuestions}`;
 
     question = questions[getRandomInt(0, questions.length)];
     questionElem.innerText = question.question;
-
-    checkSubmitDisabled();
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
