@@ -1,5 +1,6 @@
 (async () => {
-  const electronStore = window.electronAPI.electronStore;
+  const electronAPI = window.electronAPI;
+  const electronStore = electronAPI.electronStore;
 
   const questions = (await electronStore.get(`questions`)) ?? [];
 
@@ -9,6 +10,13 @@
   const submitBtn = document.getElementById("submitBtn");
   const unsureBtn = document.getElementById("unsureBtn");
 
+  // const quizStats = {
+  //   totalQuestions: 0,
+  //   correctQuestions: 0,
+  // };
+
+  let correctQuestions = 0;
+
   // TODO: make max questions configurable (& whether or not duplicates are allowed)
   const maxQuestions = 5;
   let questionNum = 0;
@@ -16,14 +24,28 @@
   newQuestion();
 
   answerElem.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") submitBtn.click();
+    if (e.key === "Enter") {
+      e.stopPropagation();
+      submitBtn.click();
+    }
   });
+
+  answerElem.addEventListener("input", checkSubmitDisabled);
 
   submitBtn.addEventListener("click", () => {
     answerElem.focus();
 
+    // TODO: disable submitBtn when answerElem is empty
+    // TODO: add stats to end screen
+    // TODO: allow closing when quiz is finished
+
+    // quizStats.totalQuestions++;
+
     const providedAnswer = answerElem.value;
     if (providedAnswer === question.answer) {
+      // quizStats.correctQuestions++;
+      correctQuestions++;
+
       // TODO: consider animation for removing this. maybe this could be a more general animation, e.g. fading the entire question page
       const hint = document.querySelector(".hint");
       if (hint) hint.remove();
@@ -33,21 +55,60 @@
 
       // TODO: consider closing from main process (?)
       if (questionNum === maxQuestions) {
-        // questionElem.remove();
-        // answerElem.remove();
-        // responseBtnsContainer.remove();
-        // questionNumElem.remove();
+        electronAPI.setQuizFinished(true);
 
         document.body.innerHTML = `
           <div class="finishedText">You finished this pop quiz!</div>
+          <table class="quizResults">
+            <tr>
+              <th>Total Questions:</th>
+              <td>${questionNum}</td>
+            </tr>
+            <tr>
+              <th>Correct Attempts:</th>
+              <td>${correctQuestions}</td>
+            </tr>
+          </table>
           <button class="responseBtn closeQuizBtn">Close</button>
         `;
+
+        // document.body.innerHTML = `
+        //   <div class="finishedText">You finished this pop quiz!</div>
+        //   <table class="quizResults">
+        //     <thead>
+        //       <tr>
+        //         <th>Total Questions</th>
+        //         <th>Correct Questions</th>
+        //       </tr>
+        //     </thead>
+        //     <tbody>
+        //       <tr>
+        //         <th>${quizStats.totalQuestions}</td>
+        //         <th>${quizStats.correctQuestions}</td>
+        //       </tr>
+        //     </tbody>
+        //     </table>
+        //   <button class="responseBtn closeQuizBtn">Close</button>
+        // `;
+
+        // document.body.innerHTML = `
+        //   <div class="finishedText">You finished this pop quiz!</div>
+        //   <div class="quizStats">
+        //     <div>Total Questions: ${quizStats.totalQuestions}</div>
+        //     <div>Correct Questions: ${quizStats.correctQuestions}</div>
+        //   </div>
+        //   <button class="responseBtn closeQuizBtn">Close</button>
+        // `;
 
         const closeQuizBtn = document.body.querySelector(".closeQuizBtn");
 
         closeQuizBtn.addEventListener("click", () => {
           // TODO: consider if this should be done from main process (?)
           window.close();
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === "Escape") closeQuizBtn.click();
         });
 
         addConfetti();
@@ -111,7 +172,9 @@
 
   answerElem.focus();
 
-  console.log(question);
+  function checkSubmitDisabled() {
+    submitBtn.disabled = answerElem.value === "";
+  }
 
   function createAlert(text) {
     let alertsContainer = document.querySelector(".alertsContainer");
@@ -164,6 +227,8 @@
 
     question = questions[getRandomInt(0, questions.length)];
     questionElem.innerText = question.question;
+
+    checkSubmitDisabled();
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
@@ -188,7 +253,6 @@
 
   function addConfetti() {
     const confetti = [];
-    // const addConfettiCount = 1000;
     const addConfettiFor = 500;
     const addConfettiUntil = Date.now() + addConfettiFor;
 

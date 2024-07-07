@@ -25,8 +25,13 @@ let allAppearAt = [];
 // whether the application is currently being quit
 let quitting = false;
 
+// FIXME: at some point, quitting needs to be set to false again (if quit is cancelled)
+
 // whether the config (dashboard) is unsaved
 let configNeedsSave = false;
+
+// whether the currently open quizWin is finished (if quizFinished = true, this avoids confirmation before close)
+let quizFinished = false;
 
 // TODO: set app icon ? (this might not be done until the application packaging stage)
 
@@ -56,8 +61,10 @@ const createWindows = () => {
         message:
           "You have unsaved changes! Are you sure you want to close your dashboard without saving?",
       });
-      if (response === 0) hideForClose = true;
-      else if (response === 1) e.preventDefault();
+      if (response === 0) {
+        // quitting = false;
+        hideForClose = true;
+      } else if (response === 1) e.preventDefault();
     }
 
     if (hideForClose) {
@@ -116,6 +123,10 @@ app.whenReady().then(async () => {
   ipcMain.handle(
     "set-needs-save",
     (_event, needsSave) => (configNeedsSave = needsSave)
+  );
+  ipcMain.handle(
+    "set-quiz-finished",
+    (_event, newQuizFinished) => (quizFinished = newQuizFinished)
   );
 
   createWindows();
@@ -203,16 +214,20 @@ function startQuiz() {
   });
   quizWin.setAlwaysOnTop(true, "floating");
   quizWin.on("close", (e) => {
-    const response = dialog.showMessageBoxSync(quizWin, {
-      type: "question",
-      buttons: ["Yes", "No"],
-      title: "Confirm Exit",
-      message:
-        "Are you sure you want to exit this quiz session? You can always begin a new session later in your Study Buddy Dashboard.",
-    });
-    if (response === 1) e.preventDefault();
+    if (!quizFinished) {
+      const response = dialog.showMessageBoxSync(quizWin, {
+        type: "question",
+        buttons: ["Yes", "No"],
+        title: "Confirm Exit",
+        message:
+          "Are you sure you want to exit this quiz session? You can always begin a new session later in your Study Buddy Dashboard.",
+      });
+      if (response === 1) e.preventDefault();
+      // else quitting = false;
+    }
   });
   quizWin.on("closed", () => {
+    quizFinished = false;
     if (quitting) app.quit();
   });
   quizWin.loadFile("windows/quiz/index.html");

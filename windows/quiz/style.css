@@ -131,6 +131,21 @@ h1 {
   flex-basis: 0;
 }
 
+.finishedText {
+  font-size: 2em;
+}
+
+.quizResults {
+  color: rgb(180 180 180);
+}
+
+.quizResults th,
+.quizResults td {
+  font-weight: normal;
+  text-align: left;
+  padding: 2px 5px 2px 0;
+}
+
 .responseBtn.closeQuizBtn {
   padding: 7px 35px;
 }
