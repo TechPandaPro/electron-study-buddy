@@ -33,10 +33,10 @@
 
       // TODO: consider closing from main process (?)
       if (questionNum === maxQuestions) {
-        // addConfetti();
+        addConfetti();
         // FIXME: add button (or preferably a whole new layout) for closing quiz, instead of using a timeout
         // setTimeout(() => {
-        window.close();
+        // window.close();
         // }, 5000);
       } else {
         answerElem.value = "";
@@ -170,7 +170,8 @@
 
   function addConfetti() {
     const confetti = [];
-    const addConfettiFor = 5000;
+    // const addConfettiCount = 1000;
+    const addConfettiFor = 500;
     const addConfettiUntil = Date.now() + addConfettiFor;
 
     const canvas = document.createElement("canvas");
@@ -186,34 +187,23 @@
     // TODO: clear interval (and remove canvas) after confetti is cleared
     setInterval(update, 16);
 
-    const gravity = 0.1;
-    const resistance = 0.99;
+    const gravity = 0.15;
+    const resistance = 0.98;
+
+    const rotateInterval = 100;
+
+    const confettiSpeedMin = 20;
+    const confettiSpeedMax = 25;
+
+    const angleSpaceBottom = 30;
+
+    // for (let i = 0; i < addConfettiCount; i++) generateConfetti();
 
     function update() {
       // if (addConfettiUntil >= Date.now()) {
-      if (confetti.length < 70) {
-        const hue = `${getRandomInt(0, 360)}deg`;
-        const saturation = `${getRandomIntInclusive(70, 100)}%`;
-        const lightness = `${getRandomIntInclusive(40, 70)}%`;
-
-        const angleDeg = getRandomArbitrary(-90, 0);
-        const angleRad = angleDeg * (Math.PI / 180);
-
-        const speed = getRandomArbitrary(10, 15);
-
-        const xVel = Math.cos(angleRad) * speed;
-        const yVel = Math.sin(angleRad) * speed;
-
-        confetti.push({
-          x: 100 + getRandomInt(-80, 80),
-          y: canvas.height - 100 + getRandomInt(-80, 80),
-          width: 10,
-          height: 20,
-          color: `hsl(${hue} ${saturation} ${lightness})`,
-          xVel,
-          yVel,
-        });
-      }
+      // if (confetti.length < 71) {
+      // if (addConfettiCount > confetti.length) generateConfetti();
+      if (addConfettiUntil > Date.now()) generateConfetti(3);
 
       for (const confetto of confetti) {
         confetto.yVel += gravity;
@@ -231,12 +221,87 @@
 
       // fun fact: confetto is the singular of confetti :)
       for (const confetto of confetti) {
+        ctx.save();
+
         ctx.fillStyle = confetto.color;
-        console.log(confetto.color);
+
+        const confettoCenterX = confetto.x + confetto.width / 2;
+        const confettoCenterY = confetto.y + confetto.height / 2;
+
+        const existedFor = Date.now() - confetto.createdAt;
+
+        const scale = getScaleForTime(existedFor);
+
+        // const scale = Math.abs(Math.cos(existedFor / 50));
+        console.log(existedFor);
+
+        ctx.translate(confettoCenterX, confettoCenterY);
+        ctx.rotate(confetto.rotation);
+        ctx.scale(scale, 1);
+        ctx.translate(-confettoCenterX, -confettoCenterY);
+
         ctx.fillRect(confetto.x, confetto.y, confetto.width, confetto.height);
+
+        ctx.restore();
       }
 
       window.requestAnimationFrame(draw);
+    }
+
+    function generateConfetti(count = 1) {
+      for (let i = 0; i < count; i++) generateConfetto();
+    }
+
+    function generateConfetto() {
+      const width = 10;
+      const height = 20;
+
+      let x;
+      let angleDeg;
+
+      if (getRandomIntInclusive(0, 1) === 0) {
+        x = 0 - height;
+        angleDeg = getRandomArbitrary(-90, -angleSpaceBottom);
+      } else {
+        x = canvas.width + height;
+        angleDeg = getRandomArbitrary(-180 + angleSpaceBottom, -90);
+      }
+
+      const y = canvas.height + height;
+
+      const speed = getRandomArbitrary(confettiSpeedMin, confettiSpeedMax);
+
+      const angleRad = angleDeg * (Math.PI / 180);
+
+      const xVel = Math.cos(angleRad) * speed;
+      const yVel = Math.sin(angleRad) * speed;
+
+      const hue = `${getRandomInt(0, 360)}deg`;
+      const saturation = `${getRandomIntInclusive(70, 100)}%`;
+      const lightness = `${getRandomIntInclusive(40, 70)}%`;
+
+      confetti.push({
+        x,
+        y,
+        rotation: getRandomInt(0, 360) * (Math.PI / 180),
+        width: width,
+        height: height,
+        color: `hsl(${hue} ${saturation} ${lightness})`,
+        xVel,
+        yVel,
+        createdAt: Date.now(),
+      });
+    }
+
+    function getScaleForTime(existedFor) {
+      const scaleAbs = (existedFor % rotateInterval) * (1 / rotateInterval);
+
+      const scale =
+        Math.floor(existedFor / rotateInterval) % 2 === 0
+          ? 1 - scaleAbs
+          : scaleAbs;
+
+      return scale;
     }
   }
 })();
