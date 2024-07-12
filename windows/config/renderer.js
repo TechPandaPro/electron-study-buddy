@@ -20,6 +20,8 @@
   const popQuizIntervalContainer = document.getElementById(
     "popQuizIntervalContainer"
   );
+  const popQuizQuestionCount = document.getElementById("popQuizQuestionCount");
+  const quizShowIncorrect = document.getElementById("quizShowIncorrect");
 
   // fetch dashboard config data
   let popQuizConfig;
@@ -57,11 +59,18 @@
     questionInput.addEventListener("blur", checkFocus);
     answerInput.addEventListener("blur", checkFocus);
 
-    questionInput.addEventListener("input", checkValues);
-    answerInput.addEventListener("input", checkValues);
+    questionInput.addEventListener("input", () => {
+      updateQuestionCountSelect();
+      checkValues();
+    });
+    answerInput.addEventListener("input", () => {
+      updateQuestionCountSelect();
+      checkValues();
+    });
 
     removeBtn.addEventListener("click", () => {
       newRow.remove();
+      updateQuestionCountSelect();
       checkNeedsSave();
     });
 
@@ -136,13 +145,20 @@
   }
 
   async function updateSavedCachedData(data = {}) {
+    const popQuizConfigDefaults = {
+      enabled: false,
+      intervalCount: 2,
+      intervalTime: 1,
+      questionCount: 3,
+      showIncorrect: false,
+    };
+
     if (data.popQuizConfig) popQuizConfig = data.popQuizConfig;
-    else
-      popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {
-        enabled: false,
-        intervalCount: 2,
-        intervalTime: 1,
-      };
+    else popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {};
+
+    for (const defaultKey in popQuizConfigDefaults)
+      if (!(defaultKey in popQuizConfig))
+        popQuizConfig[defaultKey] = popQuizConfigDefaults[defaultKey];
 
     if (data.questions) questions = data.questions;
     else questions = (await electronStore.get("questions")) ?? [];
@@ -179,6 +195,8 @@
       enabled: popQuizzesEnabledElem.checked,
       intervalCount: Number(popQuizIntervalCountElem.value),
       intervalTime: Number(popQuizIntervalTimeElem.value),
+      questionCount: Number(popQuizQuestionCount.value),
+      showIncorrect: quizShowIncorrect.checked,
     };
 
     return { popQuizConfig, questions };
@@ -188,6 +206,8 @@
     popQuizzesEnabledElem.checked = popQuizConfig.enabled;
     popQuizIntervalCountElem.value = popQuizConfig.intervalCount;
     popQuizIntervalTimeElem.value = popQuizConfig.intervalTime;
+    popQuizQuestionCount.value = popQuizConfig.questionCount;
+    quizShowIncorrect.checked = popQuizConfig.showIncorrect;
 
     for (const row of document.querySelectorAll(".questionInputs"))
       row.remove();
@@ -206,8 +226,31 @@
     checkNeedsSave();
   });
 
+  updateQuestionCountSelect();
+
   // when any input is changed, check if the save button needs to be emphasized
   document.addEventListener("input", checkNeedsSave);
+
+  function updateQuestionCountSelect() {
+    // const questionCount =
+    //   questionsBody.querySelectorAll("tr.questionInputs").length;
+
+    const questionCount = Array.from(
+      questionsBody.querySelectorAll("tr.questionInputs")
+    ).filter(
+      (row) =>
+        row.querySelector(".questionInput").value.trim() &&
+        row.querySelector(".answerInput").value.trim()
+    ).length;
+
+    const targetOptions = popQuizQuestionCount.querySelectorAll("option");
+    for (const targetOption of targetOptions) {
+      const optionValue = Number(targetOption.value);
+      if (optionValue === 0) targetOption.innerHTML = `Max (${questionCount})`;
+      // FIXME: this might be unnecessary. maybe allow duplicates?
+      else targetOption.disabled = optionValue > questionCount;
+    }
+  }
 
   function checkNeedsSave() {
     if (saveBtnCheckTimeout) clearTimeout(saveBtnCheckTimeout);

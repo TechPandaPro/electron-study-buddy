@@ -58,7 +58,7 @@
           </div>
           <div id="popQuizIntervalContainer">
             <span>Start pop quizzes </span>
-            <select id="popQuizIntervalCount">
+            <select class="styledSelect" id="popQuizIntervalCount">
               <option value="1">once</option>
               <option value="2">twice</option>
               <option value="5">5 times</option>
@@ -66,11 +66,36 @@
               <option value="20">20 times</option>
             </select>
             <span> per </span>
-            <select id="popQuizIntervalTime">
+            <select class="styledSelect" id="popQuizIntervalTime">
               <option value="1">hour</option>
               <option value="6">6 hours</option>
               <option value="12">12 hours</option>
             </select>
+          </div>
+        </div>
+        <div id="quizQuestionCountConfigContainer">
+          <!-- <div class="popQuizQuestionCountContainer"> -->
+          <span>Questions per quiz:</span>
+          <select class="styledSelect" id="popQuizQuestionCount">
+            <!-- FIXME: set width for this in CSS (so it doesn't change when JS changes max) -->
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="7">7</option>
+            <option value="9">9</option>
+            <option value="0">Max</option>
+          </select>
+          <!-- </div> -->
+        </div>
+        <div id="quizShowIncorrectConfigContainer">
+          <input type="checkbox" id="quizShowIncorrect" />
+          <label for="quizShowIncorrect"
+            >Show incorrect quiz answer submissions</label
+          >
+          <div class="additionalConfigContext">
+            This is useful if you want to look at your response again after
+            discovering that it was incorrect.
           </div>
         </div>
         <!-- -->

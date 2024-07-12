@@ -3,6 +3,7 @@
   const electronStore = electronAPI.electronStore;
 
   const questions = (await electronStore.get(`questions`)) ?? [];
+  const popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {};
 
   const questionNumElem = document.getElementById("questionNum");
   const questionElem = document.getElementById("question");
@@ -21,7 +22,10 @@
   let attemptsUsed = 0;
 
   // TODO: make max questions configurable (& whether or not duplicates are allowed)
-  const maxQuestions = 5;
+  const maxQuestions =
+    popQuizConfig.questionCount === 0
+      ? questions.length
+      : popQuizConfig.questionCount ?? 3;
   let questionNum = 0;
   let question;
   newQuestion();
@@ -145,7 +149,7 @@
       }
 
       // TODO: make this configurable (whether or not it empties after incorrect)
-      answerElem.value = "";
+      if (!(popQuizConfig.showIncorrect ?? false)) answerElem.value = "";
     }
   });
 

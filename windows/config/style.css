@@ -39,6 +39,23 @@ h1:first-child {
   background-color: rgb(135 206 235 / 0.25);
 }
 
+.styledSelect {
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+
+  border: 1px solid rgb(128 128 128);
+  border-radius: 4px;
+}
+
+.additionalConfigContext {
+  display: block;
+  padding: 2px 0 0 30px;
+  font-size: 0.9em;
+  /* font-style: italic; */
+  color: rgb(86 86 86);
+}
+
 #saveBtnContainer {
   display: flex;
   align-items: center;
@@ -292,18 +309,13 @@ table#questions tbody tr:last-of-type .removeBtn {
   opacity: 0.4;
 }
 
-#popQuizIntervalContainer select {
-  background-color: transparent;
-  color: inherit;
-  font: inherit;
-
-  border: 1px solid rgb(128 128 128);
-  border-radius: 4px;
-}
-
 @media (prefers-color-scheme: dark) {
   body {
     background-color: rgb(10 10 10);
     color: rgb(245 245 245);
+  }
+
+  .additionalConfigContext {
+    color: rgb(169 169 169);
   }
 }
