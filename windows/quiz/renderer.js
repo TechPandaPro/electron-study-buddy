@@ -11,6 +11,11 @@
   const submitBtn = document.getElementById("submitBtn");
   const unsureBtn = document.getElementById("unsureBtn");
 
+  const answerElemPlaceholder = "Give it a try here!";
+  answerElem.placeholder = answerElemPlaceholder;
+
+  const startTime = Date.now();
+
   // const quizStats = {
   //   totalQuestions: 0,
   //   correctQuestions: 0,
@@ -22,6 +27,7 @@
   let attemptsUsed = 0;
 
   // TODO: make max questions configurable (& whether or not duplicates are allowed)
+  // FIXME: max questions should be limited to the question count (this might be within the dashboard - also, this might be fine if duplicates are allowed - maybe config for that?)
   const maxQuestions =
     popQuizConfig.questionCount === 0
       ? questions.length
@@ -37,16 +43,18 @@
     }
   });
 
+  answerElem.addEventListener("input", () => {
+    answerElem.placeholder = answerElemPlaceholder;
+  });
+
   submitBtn.addEventListener("click", () => {
     answerElem.focus();
 
-    // TODO: disable submitBtn when answerElem is empty
     // TODO: add stats to end screen
-    // TODO: allow closing when quiz is finished
 
     // quizStats.totalQuestions++;
 
-    const providedAnswer = answerElem.value;
+    const providedAnswer = answerElem.value.trim();
     if (!providedAnswer)
       createAlert(
         `Please provide an answer before submitting! Click "I'm Unsure" if you don't remember the answer.`
@@ -63,13 +71,16 @@
       // TODO: consider various ways to display "correct" message
       createAlert("Correct!");
 
-      // TODO: consider closing from main process (?)
       if (questionNum === maxQuestions) {
         electronAPI.setQuizFinished(true);
 
         document.body.innerHTML = `
           <div class="finishedText">You finished this pop quiz!</div>
           <table class="quizResults">
+            <tr>
+              <th>Total Time:</th>
+              <td>${formatTime(Date.now() - startTime)}</td>
+            </tr>
             <tr>
               <th>Total Questions:</th>
               <td>${questionNum}</td>
@@ -81,34 +92,6 @@
           </table>
           <button class="responseBtn closeQuizBtn">Close</button>
         `;
-
-        // document.body.innerHTML = `
-        //   <div class="finishedText">You finished this pop quiz!</div>
-        //   <table class="quizResults">
-        //     <thead>
-        //       <tr>
-        //         <th>Total Questions</th>
-        //         <th>Correct Questions</th>
-        //       </tr>
-        //     </thead>
-        //     <tbody>
-        //       <tr>
-        //         <th>${quizStats.totalQuestions}</td>
-        //         <th>${quizStats.correctQuestions}</td>
-        //       </tr>
-        //     </tbody>
-        //     </table>
-        //   <button class="responseBtn closeQuizBtn">Close</button>
-        // `;
-
-        // document.body.innerHTML = `
-        //   <div class="finishedText">You finished this pop quiz!</div>
-        //   <div class="quizStats">
-        //     <div>Total Questions: ${quizStats.totalQuestions}</div>
-        //     <div>Correct Questions: ${quizStats.correctQuestions}</div>
-        //   </div>
-        //   <button class="responseBtn closeQuizBtn">Close</button>
-        // `;
 
         const closeQuizBtn = document.body.querySelector(".closeQuizBtn");
 
@@ -122,11 +105,6 @@
         });
 
         addConfetti();
-
-        // FIXME: add button (or preferably a whole new layout) for closing quiz, instead of using a timeout
-        // setTimeout(() => {
-        // window.close();
-        // }, 5000);
       } else {
         answerElem.value = "";
         newQuestion();
@@ -148,8 +126,10 @@
         );
       }
 
-      // TODO: make this configurable (whether or not it empties after incorrect)
-      if (!(popQuizConfig.showIncorrect ?? false)) answerElem.value = "";
+      if (popQuizConfig.showIncorrect ?? false)
+        answerElem.placeholder = providedAnswer;
+
+      answerElem.value = "";
     }
   });
 
@@ -241,6 +221,71 @@
     questionElem.innerText = question.question;
   }
 
+  // decided to scrap this version
+  // function formatTime(ms) {
+  //   const totalSeconds = Math.floor(ms / 1000);
+
+  //   const hours = Math.floor(totalSeconds / 3600);
+  //   const remaining = totalSeconds % 3600;
+  //   const minutes = Math.floor(remaining / 60);
+  //   const seconds = remaining % 60;
+
+  //   const formattedHours = hours.toString().padStart(2, "0");
+  //   const formattedMinutes = minutes.toString().padStart(2, "0");
+  //   const formattedSeconds = seconds.toString().padStart(2, "0");
+
+  //   return hours >= 1
+  //     ? `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+  //     : `${formattedMinutes}:${formattedSeconds}`;
+  // }
+
+  // scrapped this version, too
+  // function formatTime(ms) {
+  //   const totalSeconds = Math.floor(ms / 1000);
+
+  //   const hours = Math.floor(totalSeconds / 3600);
+  //   const remaining = totalSeconds % 3600;
+  //   const minutes = Math.floor(remaining / 60);
+  //   const seconds = remaining % 60;
+
+  //   if (hours >= 1) {
+  //     const paddedHours = hours.toString().padStart(2, "0");
+  //     const paddedMinutes = minutes.toString().padStart(2, "0");
+  //     const paddedSeconds = seconds.toString().padStart(2, "0");
+  //     return `${paddedHours}h:${paddedMinutes}m:${paddedSeconds}s`;
+  //   } else if (minutes >= 1) {
+  //     const minutesPl = minutes === 1 ? "" : "s";
+  //     const secondsPl = seconds === 1 ? "" : "s";
+  //     return `${minutes} minute${minutesPl}, ${seconds}s${secondsPl}`;
+  //   } else {
+  //     const secondsPl = seconds === 1 ? "" : "s";
+  //     return `${seconds} second${secondsPl}`;
+  //   }
+  // }
+
+  function formatTime(ms) {
+    const hours = Math.floor(ms / 3600000);
+    const remaining = ms % 3600000;
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Number(((remaining % 60000) / 1000).toFixed(2));
+
+    const units = [
+      { num: hours, unit: "h" },
+      { num: minutes, unit: "m" },
+      { num: seconds, unit: "s" },
+    ];
+
+    for (let i = 0; i < units.length; i++) {
+      const unit = units[i];
+      if (i < units.length - 1 && unit.num === 0) {
+        units.splice(i, 1);
+        i--;
+      } else break;
+    }
+
+    return units.map((unit) => `${unit.num}${unit.unit}`).join(", ");
+  }
+
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
   // min is inclusive, max is exclusive
   function getRandomInt(min, max) {
@@ -276,8 +321,7 @@
 
     window.requestAnimationFrame(draw);
 
-    // TODO: clear interval (and remove canvas) after confetti is cleared
-    setInterval(update, 16);
+    const interval = setInterval(update, 16);
 
     const gravity = 0.15;
     const resistance = 0.98;
@@ -300,6 +344,15 @@
 
         confetto.x += confetto.xVel;
         confetto.y += confetto.yVel;
+      }
+
+      const clearConfetti = confetti.every(
+        (confetto) =>
+          confetto.y >= canvas.height + confetto.height && confetto.yVel > 0
+      );
+      if (clearConfetti) {
+        clearInterval(interval);
+        canvas.remove();
       }
     }
 

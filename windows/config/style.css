@@ -309,6 +309,10 @@ table#questions tbody tr:last-of-type .removeBtn {
   opacity: 0.4;
 }
 
+#popQuizQuestionCount {
+  width: 90px;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background-color: rgb(10 10 10);
