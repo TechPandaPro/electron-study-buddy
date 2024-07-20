@@ -15,6 +15,7 @@ if (process.platform !== "darwin") throw new Error("Platform not supported");
 let tray;
 let configWin;
 let quizWin;
+let flashcardsWin;
 
 // cached value of persistent popQuizConfig
 let popQuizConfig;
@@ -120,6 +121,7 @@ app.whenReady().then(async () => {
   ipcMain.handle("electron-store-get", (_event, key) => store.get(key));
   ipcMain.handle("electron-store-delete", (_event, key) => store.delete(key));
   ipcMain.handle("quiz-start", () => startQuiz());
+  ipcMain.handle("flashcards-start", () => startFlashcards());
   ipcMain.handle(
     "set-needs-save",
     (_event, needsSave) => (configNeedsSave = needsSave)
@@ -233,6 +235,49 @@ function startQuiz() {
   quizWin.loadFile("windows/quiz/index.html");
 
   setQuizPosition();
+}
+
+function startFlashcards() {
+  if (flashcardsWin && !flashcardsWin.isDestroyed())
+    return flashcardsWin.focus();
+
+  flashcardsWin = new BrowserWindow({
+    width: 500,
+    height: 300,
+    transparent: true,
+    hasShadow: false,
+    // backgroundColor: "rgba(0, 0, 0, 0)",
+    // frame: false,
+    resizable: false,
+    // fullscreen: true,
+    // movable: false,
+    webPreferences: {
+      preload: path.join(__dirname, "windows", "flashcards", "preload.js"),
+    },
+    titleBarStyle: "hidden",
+  });
+  // flashcardsWin.setTrafficLightPosition({ x: 0, y: 0 });
+  // flashcardsWin.setAlwaysOnTop(true, "floating");
+  // flashcardsWin.on("close", (e) => {
+  //   if (!quizFinished) {
+  //     const response = dialog.showMessageBoxSync(flashcardsWin, {
+  //       type: "question",
+  //       buttons: ["Yes", "No"],
+  //       title: "Confirm Exit",
+  //       message:
+  //         "Are you sure you want to exit this quiz session? You can always begin a new session later in your Study Buddy Dashboard.",
+  //     });
+  //     if (response === 1) e.preventDefault();
+  //     // else quitting = false;
+  //   }
+  // });
+  // flashcardsWin.on("closed", () => {
+  //   quizFinished = false;
+  //   if (quitting) app.quit();
+  // });
+  flashcardsWin.loadFile("windows/flashcards/index.html");
+
+  // setQuizPosition();
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random

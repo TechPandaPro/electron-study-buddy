@@ -96,6 +96,11 @@ h1:first-child {
   height: 15px;
 }
 
+#studyContainer {
+  display: flex;
+  gap: 7px;
+}
+
 #configContainer {
   display: flex;
   flex-direction: column;

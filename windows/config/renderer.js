@@ -9,6 +9,7 @@
   const saveBtn = document.getElementById("saveBtn");
   const saveBtnCheck = document.getElementById("saveBtnCheck");
   const quizDemoBtn = document.getElementById("quizDemoBtn");
+  const flashcardsBtn = document.getElementById("flashcardsBtn");
 
   const popQuizzesEnabledElem = document.getElementById("popQuizzesEnabled");
   const popQuizIntervalCountElem = document.getElementById(
@@ -219,6 +220,8 @@
   }
 
   quizDemoBtn.addEventListener("click", () => electronAPI.startQuiz());
+
+  flashcardsBtn.addEventListener("click", () => electronAPI.startFlashcards());
 
   electronAPI.onResetUnsaved(() => {
     console.log("Reset");

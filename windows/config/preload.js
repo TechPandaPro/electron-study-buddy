@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     delete: (key) => ipcRenderer.invoke("electron-store-delete", key),
   },
   startQuiz: () => ipcRenderer.invoke("quiz-start"),
+  startFlashcards: () => ipcRenderer.invoke("flashcards-start"),
   setNeedsSave: (needsSave) => ipcRenderer.invoke("set-needs-save", needsSave),
   onResetUnsaved: (callback) =>
     ipcRenderer.on("reset-unsaved", () => callback()),
