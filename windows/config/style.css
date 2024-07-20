@@ -22,6 +22,7 @@ h1:first-child {
 }
 
 .styledButton {
+  display: inline-block;
   border-radius: 5px;
   padding: 5px 15px;
   font-size: 0.9em;
@@ -326,10 +327,13 @@ table#questions tbody tr:last-of-type .removeBtn {
 .aiAssistOverlay {
   position: absolute;
   z-index: 10;
-  top: 10px;
+  padding: 10px;
+  /* top: 10px; */
+  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
   background-color: inherit;
 }
 
@@ -345,7 +349,7 @@ table#questions tbody tr:last-of-type .removeBtn {
   cursor: pointer;
 
   position: absolute;
-  top: 0;
+  top: 7px;
   left: 10px;
 }
 
@@ -357,6 +361,7 @@ table#questions tbody tr:last-of-type .removeBtn {
 .styledLabel {
   display: block;
   font-weight: bold;
+  margin-bottom: 5px;
 }
 
 .styledTextInput {
@@ -385,6 +390,39 @@ table#questions tbody tr:last-of-type .removeBtn {
 
 #openAiApiKey {
   width: 350px;
+}
+
+.aiQuestionAssistItemsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* .genFromImgContainer {
+  margin-top: 10px;
+} */
+
+.genFromImgAfterContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 2px solid rgb(128 128 128 / 0.5);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.genFromImgFinalContainer {
+  display: flex;
+  gap: 7px;
+}
+
+.genFromImgBeforeContainer.hidden,
+.genFromImgAfterContainer.hidden {
+  display: none;
+}
+
+#genFile {
+  display: none;
 }
 
 @media (prefers-color-scheme: dark) {

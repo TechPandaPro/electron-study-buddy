@@ -302,16 +302,117 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
           </svg>
         </button>
-        <label for="openAiApiKey" class="styledLabel">OpenAI API Key:</label>
-        <input type="password" class="styledTextInput" id="openAiApiKey" placeholder="sk-..." />
+        <div class="aiQuestionAssistItemsWrapper">
+          <div class="openAiApiKeyContainer">
+            <label for="openAiApiKey" class="styledLabel">OpenAI API Key:</label>
+            <input type="password" class="styledTextInput" id="openAiApiKey" placeholder="sk-..." />
+          </div>
+          <div class="genFromImgContainer">
+            <div class="genFromImgBeforeContainer">
+              <button class="styledButton" id="genFromImgBtn">Generate Questions from Image</button>
+            </div>
+            <div class="genFromImgAfterContainer hidden">
+              <div>
+                <label for="genFile" class="styledButton">Upload File</label>
+                <input type="file" id="genFile" accept=".png, .jpeg, .jpg, .webp" multiple />
+                <div id="filePreviews"></div>
+              </div>
+              <div>
+                <input type="checkbox" id="createNewQuestions" />
+                <label for="createNewQuestions">Create New Questions</label>
+                <div class="additionalConfigContext">AI Question Assist can create new questions based upon the content within your image. If unselected, questions will only be pulled directly from the content within the image. (The former ensures more versatility, whereas the latter ensures better accuracy and relevance.)</div>
+              </div>
+              <div class="genFromImgFinalContainer">
+                <button class="styledButton" id="genFinalBtn">Generate</button>
+                <button class="styledButton" id="cancelFinalBtn">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     `;
 
-    const openAiApiKeyInput = aiAssistOverlay.querySelector("#openAiApiKey");
+    // <div id="quizShowIncorrectConfigContainer">
+    //   <input type="checkbox" id="quizShowIncorrect" />
+    //   <label for="quizShowIncorrect"
+    //     >Show incorrect quiz answer submissions</label
+    //   >
+    //   <div class="additionalConfigContext">
+    //     This is useful if you want to look at your response again after
+    //     discovering that it was incorrect.
+    //   </div>
+    // </div>
 
     const exitAssistBtn = aiAssistOverlay.querySelector(".exitAssistBtn");
     exitAssistBtn.addEventListener("click", () => {
       aiAssistOverlay.remove();
+    });
+
+    const openAiApiKeyInput = aiAssistOverlay.querySelector("#openAiApiKey");
+
+    // const genFromImgContainer = aiAssistOverlay.querySelector(
+    //   ".genFromImgContainer"
+    // );
+
+    const genFromImgBeforeContainer = aiAssistOverlay.querySelector(
+      ".genFromImgBeforeContainer"
+    );
+    const genFromImgAfterContainer = aiAssistOverlay.querySelector(
+      ".genFromImgAfterContainer"
+    );
+
+    const genFromImgBtn =
+      genFromImgBeforeContainer.querySelector("#genFromImgBtn");
+
+    const genFile = genFromImgAfterContainer.querySelector("#genFile");
+    const filePreviews =
+      genFromImgAfterContainer.querySelector("#filePreviews");
+    const createNewQuestions = genFromImgAfterContainer.querySelector(
+      "#createNewQuestions"
+    );
+    const genFinalBtn = genFromImgAfterContainer.querySelector("#genFinalBtn");
+    const cancelFinalBtn =
+      genFromImgAfterContainer.querySelector("#cancelFinalBtn");
+
+    genFromImgBtn.addEventListener("click", () => {
+      // const fileUpload = document.createElement("input");
+      // fileUpload.type = "file";
+      //
+      // const generateBtn = document.createElement("button");
+      // generateBtn.classList.add("styledButton");
+      // generateBtn.innerText = "Generate";
+      //
+      // genFromImgContainer.append(fileUpload, generateBtn);
+
+      genFromImgBeforeContainer.classList.add("hidden");
+      genFromImgAfterContainer.classList.remove("hidden");
+    });
+
+    cancelFinalBtn.addEventListener("click", () => {
+      genFile.value = "";
+      createNewQuestions.checked = false;
+
+      genFromImgBeforeContainer.classList.remove("hidden");
+      genFromImgAfterContainer.classList.add("hidden");
+    });
+
+    genFile.addEventListener("change", () => {
+      filePreviews.innerHTML = "";
+      if (genFile.files.length >= 1) {
+        const fileNames = Array.from(genFile.files)
+          .map((file) => file.name)
+          .join(", ");
+        console.log(fileNames);
+
+        // FIXME: resize these images
+        for (const image of genFile.files) {
+          const imageElem = document.createElement("img");
+          imageElem.src = URL.createObjectURL(image);
+          imageElem.alt = image.name;
+          imageElem.title = image.name;
+          filePreviews.append(imageElem);
+        }
+      }
     });
 
     document.body.appendChild(aiAssistOverlay);
