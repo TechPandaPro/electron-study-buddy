@@ -480,9 +480,17 @@
             model: "gpt-4o-mini",
             messages: [
               {
+                role: "system",
+                content:
+                  "You are an AI studying assistant. Your task is to analyze images of curriculum materials and use this as the basis for generating relevant questions and answers. The questions and answers should be pertinent material that can be used for studying. Format the questions and answers in a concise manner that could be used for flashcards. Rather than writing full sentences for questions, use brief phrases or words, where possible.",
+              },
+              {
                 role: "user",
                 content: [
-                  { type: "text", text: "Generate questions." },
+                  {
+                    type: "text",
+                    text: "Generate the questions and answers.",
+                  },
                   ...imageDataUrls.map((dataUrl) => ({
                     type: "image_url",
                     image_url: { url: dataUrl },
