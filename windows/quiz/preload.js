@@ -13,8 +13,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   electronStore: {
-    set: (key, value) => ipcRenderer.invoke("electron-store-set", key, value),
-    // get: (key) => ipcRenderer.invoke("electron-store-get", key),
+    // set: (key, value) => ipcRenderer.invoke("electron-store-set", key, value),
+    get: (key) => ipcRenderer.invoke("electron-store-get", key),
     // delete: (key) => ipcRenderer.invoke("electron-store-delete", key),
   },
   setQuizFinished: (quizFinished) =>

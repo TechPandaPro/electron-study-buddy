@@ -4,6 +4,8 @@
   const electronAPI = window.electronAPI;
   const electronStore = electronAPI.electronStore;
 
+  const aiQuestionAssistBtn = document.getElementById("aiQuestionAssistBtn");
+
   const questionsBody = document.querySelector("#questions tbody");
   const flipQuestionsBtn = document.getElementById("flipQuestionsBtn");
   const saveBtn = document.getElementById("saveBtn");
@@ -282,4 +284,38 @@
     const inputElems = popQuizIntervalContainer.querySelectorAll("select");
     for (const inputElem of inputElems) inputElem.disabled = !popQuizzesEnabled;
   }
+
+  aiQuestionAssistBtn.addEventListener("click", () => {
+    const aiAssistOverlay = document.createElement("div");
+    aiAssistOverlay.classList.add("aiAssistOverlay");
+
+    //   <svg width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+    //   <path d="M11 11L129 129" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
+    //   <path d="M11 129L129 11" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
+    // </svg>
+
+    aiAssistOverlay.innerHTML = `
+      <div id="dashboardContainer">
+        <h1>AI Question Assist</h1>
+        <button class="exitAssistBtn" aria-label="Exit">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
+          </svg>
+        </button>
+        <label for="openAiApiKey" class="styledLabel">OpenAI API Key:</label>
+        <input type="password" class="styledTextInput" id="openAiApiKey" placeholder="sk-..." />
+      </div>
+    `;
+
+    const openAiApiKeyInput = aiAssistOverlay.querySelector("#openAiApiKey");
+
+    const exitAssistBtn = aiAssistOverlay.querySelector(".exitAssistBtn");
+    exitAssistBtn.addEventListener("click", () => {
+      aiAssistOverlay.remove();
+    });
+
+    document.body.appendChild(aiAssistOverlay);
+  });
+
+  aiQuestionAssistBtn.click();
 })();

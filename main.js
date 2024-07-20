@@ -275,6 +275,7 @@ function startFlashcards() {
   //   quizFinished = false;
   //   if (quitting) app.quit();
   // });
+  // TODO: figure out best way to prevent flashcard "ghosting". the below may be the best route.
   // setInterval(() => {
   //   flashcardsWin.setSize(
   //     flashcardsWin.getSize()[0],

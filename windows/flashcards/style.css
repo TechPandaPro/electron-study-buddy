@@ -34,7 +34,7 @@ body {
   vertical-align: middle; */
   /* background-color: blue; */
 
-  transition: transform 25s;
+  transition: transform 0.5s;
 
   transform-style: preserve-3d;
 }

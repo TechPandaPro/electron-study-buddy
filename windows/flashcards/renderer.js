@@ -23,17 +23,17 @@
     flashcard.style.transform = "rotateY(-180deg)";
   });
 
-  document.body.addEventListener("keydown", (e) => {
-    if (e.key === "a") {
-      if (document.body.style.backgroundColor) {
-        document.body.style.removeProperty("background-color");
-        document.body.style.transform = "translateZ(0deg)";
-      } else {
-        document.body.style.backgroundColor = "blue";
-        document.body.style.transform = "translateZ(10deg)";
-      }
-    }
-  });
+  // document.body.addEventListener("keydown", (e) => {
+  //   if (e.key === "a") {
+  //     if (document.body.style.backgroundColor) {
+  //       document.body.style.removeProperty("background-color");
+  //       document.body.style.transform = "translateZ(0deg)";
+  //     } else {
+  //       document.body.style.backgroundColor = "blue";
+  //       document.body.style.transform = "translateZ(10deg)";
+  //     }
+  //   }
+  // });
 
   flashcard.addEventListener("transitionend", () => {
     const textFront = flashcardTextFront.innerText;
