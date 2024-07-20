@@ -4,6 +4,8 @@
   const electronAPI = window.electronAPI;
   const electronStore = electronAPI.electronStore;
 
+  const mainDashboardContainer = document.querySelector(".dashboardContainer");
+
   const aiQuestionAssistBtn = document.getElementById("aiQuestionAssistBtn");
 
   const questionsBody = document.querySelector("#questions tbody");
@@ -295,7 +297,7 @@
     // </svg>
 
     aiAssistOverlay.innerHTML = `
-      <div id="dashboardContainer">
+      <div class="dashboardContainer">
         <h1>AI Question Assist</h1>
         <button class="exitAssistBtn" aria-label="Exit">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -315,8 +317,8 @@
               <div>
                 <label for="genFile" class="styledButton">Upload File</label>
                 <input type="file" id="genFile" accept=".png, .jpeg, .jpg, .webp" multiple />
-                <div id="filePreviews"></div>
               </div>
+              <div id="filePreviews" class="hidden"></div>
               <div>
                 <input type="checkbox" id="createNewQuestions" />
                 <label for="createNewQuestions">Create New Questions</label>
@@ -390,6 +392,8 @@
 
     cancelFinalBtn.addEventListener("click", () => {
       genFile.value = "";
+      filePreviews.innerHTML = "";
+      filePreviews.classList.add("hidden");
       createNewQuestions.checked = false;
 
       genFromImgBeforeContainer.classList.remove("hidden");
@@ -407,15 +411,106 @@
         // FIXME: resize these images
         for (const image of genFile.files) {
           const imageElem = document.createElement("img");
+          imageElem.classList.add("filePreview");
+          imageElem.height = 100;
           imageElem.src = URL.createObjectURL(image);
           imageElem.alt = image.name;
           imageElem.title = image.name;
           filePreviews.append(imageElem);
         }
-      }
+
+        filePreviews.classList.remove("hidden");
+      } else filePreviews.classList.add("hidden");
     });
 
-    document.body.appendChild(aiAssistOverlay);
+    genFinalBtn.addEventListener("click", () => {
+      genFromImgAfterContainer.classList.add("loading");
+
+      // const tempCanvas = document.createElement("canvas");
+      // const tempCtx = tempCanvas.getContext("2d");
+
+      // const imageDataUrls = Array.from(
+      //   filePreviews.querySelectorAll(".filePreview")
+      // ).map((image) => {
+      //   tempCanvas.width = image.naturalWidth;
+      //   tempCanvas.height = image.naturalHeight;
+      //   tempCtx.drawImage(image, 0, 0, tempCanvas.width, tempCanvas.height);
+      //   return tempCanvas.toDataURL();
+      // });
+
+      // const imageDataUrls = Array.from(genFile.files).map((file) => {
+      //   const reader = new FileReader();
+      //   reader.addEventListener(
+      //     "load",
+      //     (e) => {
+      //       console.log(e.target.result);
+      //     },
+      //     { once: true }
+      //   );
+      //   reader.readAsDataURL(file);
+      // });
+
+      const fileCount = genFile.files.length;
+      const imageDataUrls = [];
+
+      for (const file of genFile.files) {
+        const reader = new FileReader();
+        reader.addEventListener(
+          "load",
+          (e) => {
+            const dataUrl = e.target.result;
+            imageDataUrls.push(dataUrl);
+            if (imageDataUrls.length === fileCount) sendDataUrls();
+          },
+          { once: true }
+        );
+        reader.readAsDataURL(file);
+      }
+
+      console.log(imageDataUrls);
+
+      function sendDataUrls() {
+        fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${openAiApiKeyInput.value}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: "Generate questions." },
+                  ...imageDataUrls.map((dataUrl) => ({
+                    type: "image_url",
+                    image_url: { url: dataUrl },
+                  })),
+                  // { type: "image_url", image_url: { url: "" } },
+                ],
+              },
+            ],
+          }),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            const response = res.choices[0].message.content;
+            console.log(response);
+          });
+      }
+
+      // the OpenAI API can actually just be fetched client-side
+      // fetch("/api/createQuestions", {
+      //   method: "POST",
+      //   body: genFile.files,
+      // })
+      //   .then((res) => res.json())
+      //   .then((res) => console.log(res));
+    });
+
+    // document.body.appendChild(aiAssistOverlay);
+    document.body.insertBefore(aiAssistOverlay, mainDashboardContainer);
   });
 
   aiQuestionAssistBtn.click();
