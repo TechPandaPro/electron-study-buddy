@@ -275,6 +275,18 @@ function startFlashcards() {
   //   quizFinished = false;
   //   if (quitting) app.quit();
   // });
+  // setInterval(() => {
+  //   flashcardsWin.setSize(
+  //     flashcardsWin.getSize()[0],
+  //     flashcardsWin.getSize()[1] + 1
+  //   );
+  //   setTimeout(() => {
+  //     flashcardsWin.setSize(
+  //       flashcardsWin.getSize()[0],
+  //       flashcardsWin.getSize()[1] - 1
+  //     );
+  //   });
+  // }, 20);
   flashcardsWin.loadFile("windows/flashcards/index.html");
 
   // setQuizPosition();
