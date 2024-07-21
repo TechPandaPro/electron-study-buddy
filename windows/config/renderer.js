@@ -314,7 +314,9 @@
                 <input type="file" id="genFile" accept=".png, .jpeg, .jpg, .webp" multiple />
               </div>
               <div id="filePreviews" class="hidden"></div>
-              <div id="questionPreviews" class="hidden"></div>
+              <div id="questionPreviews" class="hidden">
+                <div id="questionPreviewsInner"></div>
+              </div>
               <div>
                 <label for="customInstructions" class="styledLabel">Custom Instructions:</label>
                 <div class="additionalContext">Custom instructions are useful if you want to refine the generated questions to better match your use case. These instructions will be sent to GPT when generating questions.</div>
@@ -367,6 +369,9 @@
       genFromImgAfterContainer.querySelector("#filePreviews");
     const questionPreviews =
       genFromImgAfterContainer.querySelector("#questionPreviews");
+    const questionPreviewsInner = genFromImgAfterContainer.querySelector(
+      "#questionPreviewsInner"
+    );
     const createNewQuestions = genFromImgAfterContainer.querySelector(
       "#createNewQuestions"
     );
@@ -414,7 +419,7 @@
       filePreviews.innerHTML = "";
       filePreviews.classList.add("hidden");
 
-      questionPreviews.innerHTML = "";
+      questionPreviewsInner.innerHTML = "";
       questionPreviews.classList.add("hidden");
 
       createNewQuestions.checked = false;
@@ -453,11 +458,24 @@
     let mouseMoveY = null;
 
     function getScrollPadding() {
-      const scrollPadding = Math.min(60, 0.2 * window.innerHeight);
+      const scrollPadding = Math.min(80, 0.2 * window.innerHeight);
       return scrollPadding;
     }
     // TODO: make scrollBy change based on mouse distance to edge
-    const scrollBy = 4;
+    function getScrollBy() {
+      // const scrollBy = 4;
+
+      const scrollPadding = getScrollPadding();
+
+      const distanceToEdge =
+        mouseMoveY < window.innerHeight / 2
+          ? mouseMoveY
+          : window.innerHeight - mouseMoveY;
+
+      const scrollBy = 8 * (1 - distanceToEdge / scrollPadding);
+
+      return scrollBy;
+    }
 
     let checkingScroll = false;
 
@@ -466,6 +484,7 @@
     function checkScroll() {
       // console.log(mouseMoveY);
       const scrollPadding = getScrollPadding();
+      const scrollBy = getScrollBy();
       // console.log(moving);
       // console.log("check!");
       if (mouseMoveY === null) checkingScroll = false;
@@ -575,7 +594,7 @@
         }
 
         const nearestRow = Array.from(
-          questionPreviews.querySelectorAll("tbody tr")
+          questionPreviewsInner.querySelectorAll("tbody tr")
         ).sort((a, b) => {
           const aRect = a.getBoundingClientRect();
           const aPos = aRect.top + aRect.height / 2;
@@ -719,7 +738,7 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
 
               questionPreviews.classList.remove("hidden");
 
-              questionPreviews.innerHTML = `
+              questionPreviewsInner.innerHTML = `
                 <table class="questionPreviewsTable">
                   <thead>
                     <tr>
@@ -730,15 +749,37 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                   </thead>
                   <tbody></tbody>
                 </table>
-                <button class="styledButton">Import <span class="questionImportCount"></span> Questions</button>
+                <button class="importBtn styledButton">Import <span class="questionImportCount"></span> Questions</button>
                 <div class="additionalContext">Importing these questions will add them to your existing list of questions. Your existing questions will not be erased.</div>
               `;
               // TODO: add question count to button
 
-              const tableBody = questionPreviews.querySelector("table tbody");
-              const questionImportCount = questionPreviews.querySelector(
+              const tableBody =
+                questionPreviewsInner.querySelector("table tbody");
+              const importBtn =
+                questionPreviewsInner.querySelector(".importBtn");
+              const questionImportCount = importBtn.querySelector(
                 ".questionImportCount"
               );
+
+              importBtn.addEventListener("click", () => {
+                questionPreviews.style.height = `${questionPreviews.offsetHeight}px`;
+                questionPreviews.offsetHeight;
+                // questionPreviews.addEventListener("transitionstart", () =>
+                //   questionPreviews.style.removeProperty("height")
+                // );
+                questionPreviews.classList.add("importSuccess");
+                questionPreviews.addEventListener(
+                  "transitionend",
+                  () => {
+                    questionPreviews.style.removeProperty("height");
+                    setTimeout(() => {
+                      questionPreviews.classList.add("removing");
+                    }, 1000);
+                  },
+                  { once: true }
+                );
+              });
 
               function handleCheckInput(elem) {
                 const checkbox = elem.querySelector(".includeCheckbox");
@@ -749,9 +790,14 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
               }
 
               function setQuestionImportCount() {
-                questionImportCount.innerText = tableBody
-                  .querySelectorAll(".includeCheckbox:checked")
-                  .length.toLocaleString();
+                const importCount = tableBody.querySelectorAll(
+                  ".includeCheckbox:checked"
+                ).length;
+
+                if (importCount === 0) importBtn.disabled = true;
+                else importBtn.disabled = false;
+
+                questionImportCount.innerText = importCount.toLocaleString();
               }
 
               for (const question of parsedResponse.questions) {

@@ -5,7 +5,7 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; img-src 'self' blob:; connect-src 'self' https://api.openai.com"
+      content="default-src 'self'; script-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://api.openai.com"
     />
     <title>Study Buddy Dashboard</title>
     <script src="./renderer.js" defer></script>
@@ -111,9 +111,9 @@
           <div id="saveBtnCheck">
             <!-- prettier-ignore -->
             <svg width="135" height="135" viewBox="0 0 135 135" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M13 72L47 106" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
-            <path d="M47 106L123 30" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
-          </svg>
+              <path d="M13 72L47 106" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
+              <path d="M47 106L123 30" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
+            </svg>
             <span>Saved</span>
           </div>
         </div>

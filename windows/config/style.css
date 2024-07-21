@@ -30,19 +30,27 @@ h1:first-child {
   border-radius: 5px;
   padding: 5px 15px;
   font-size: 0.9em;
-  cursor: pointer;
   color: inherit;
   border: 2px solid rgb(50 50 50);
   background-color: rgb(135 206 235 / 0.3);
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, opacity 0.2s;
 }
 
-.styledButton:hover {
+.styledButton:enabled {
+  cursor: pointer;
+}
+
+.styledButton:enabled:hover {
   background-color: rgb(135 206 235 / 0.37);
 }
 
-.styledButton:active {
+.styledButton:enabled:active {
   background-color: rgb(135 206 235 / 0.25);
+}
+
+.styledButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .styledSelect {
@@ -189,6 +197,68 @@ button + .additionalContext {
 
 #flipQuestionsBtn:active {
   transform: translate(-50%, -50%) scale(0.7);
+}
+
+#questionPreviews {
+  position: relative;
+  overflow: hidden;
+  /* transition: height 0.5s, opacity 0.5s; */
+  transition: height 0.3s;
+}
+
+#questionPreviews.importSuccess:not(.removing) {
+  height: 50px !important;
+  /* height: 100px !important; */
+  /* opacity: 0; */
+  /* animation: questionPreviewsShrinkDisappear 1s 0.2s forwards; */
+}
+
+#questionPreviews.importSuccess.removing {
+  height: 0px;
+  opacity: 0;
+  transition: opacity 0.1s, height 0.2s;
+}
+
+#questionPreviewsInner {
+  transition: opacity 0.3s;
+}
+
+#questionPreviews.importSuccess #questionPreviewsInner {
+  opacity: 0;
+}
+
+/* #questionPreviews.importSuccess::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+} */
+
+#questionPreviews.importSuccess::after {
+  content: "";
+
+  position: absolute;
+  /* top: 50%; */
+  top: 0;
+  left: 50%;
+
+  width: 50px;
+  height: 50px;
+
+  /* https://flowbite.com/icons/ + https://yoksel.github.io/url-encoder/ */
+  background-image: url("data:image/svg+xml,%3Csvg aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='rgb(128 128 128)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 11.917 9.724 16.5 19 7.5'/%3E%3C/svg%3E%0A");
+  background-size: 100%;
+
+  opacity: 0;
+  transform: translateX(-50%);
+  /* transform: translate(-50%, -50%); */
+
+  /* animation: showImportSuccess 0.2s 0.2s forwards; */
+  animation: showImportSuccess 0.2s forwards;
 }
 
 table#questions,
@@ -396,7 +466,7 @@ table#questions tbody tr:last-of-type .removeBtn {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   box-sizing: border-box;
   background-color: inherit;
 }
@@ -578,6 +648,22 @@ table#questions tbody tr:last-of-type .removeBtn {
 
   to {
     transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* @keyframes questionPreviewsShrinkDisappear {
+  to {
+    height: 0px !important;
+  }
+} */
+
+@keyframes showImportSuccess {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
