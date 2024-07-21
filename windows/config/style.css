@@ -269,7 +269,10 @@ table.questionPreviewsTable tbody tr {
 }
 
 table.questionPreviewsTable tbody tr.moving {
-  opacity: 0.5;
+  /* opacity: 0.5; */
+  transform: scale(1.02);
+  background-color: rgb(255 255 255);
+  box-shadow: 2px 2px 5px rgb(0 0 0 / 0.5);
   /* background-image: repeating-linear-gradient(
     -45deg,
     rgb(128 128 128 / 0.15) 0px,
@@ -280,6 +283,10 @@ table.questionPreviewsTable tbody tr.moving {
   background-size: 200%; */
   /* background-position: 0% 0%; */
   /* animation: trMovingAnim 1s infinite; */
+}
+
+table.questionPreviewsTable tbody tr:not([data-checked], .moving) {
+  opacity: 0.3;
 }
 
 .includeCheckbox {
@@ -499,7 +506,7 @@ table#questions tbody tr:last-of-type .removeBtn {
   width: 100%;
   height: 100%;
 
-  background-color: rgb(0 0 0 / 0.8);
+  background-color: rgb(255 255 255 / 0.8);
 }
 
 .genFromImgAfterContainer.loading::after {
@@ -541,6 +548,25 @@ table#questions tbody tr:last-of-type .removeBtn {
   max-height: 150px;
   resize: vertical;
   box-sizing: border-box;
+}
+
+.scrollDetectTop,
+.scrollDetectBottom {
+  position: absolute;
+  left: 0;
+
+  width: 100%;
+  height: min(60px, 20%);
+
+  /* background-color: blue; */
+}
+
+.scrollDetectTop {
+  top: 0;
+}
+
+.scrollDetectBottom {
+  bottom: 0;
 }
 
 @keyframes loaderSpin {
@@ -594,5 +620,14 @@ table#questions tbody tr:last-of-type .removeBtn {
   .additionalConfigContext,
   .additionalContext {
     color: rgb(169 169 169);
+  }
+
+  table.questionPreviewsTable tbody tr.moving {
+    /* background-color: rgb(128 128 128 / 0.3); */
+    background-color: rgb(128 128 128 / 0.4);
+  }
+
+  .genFromImgAfterContainer.loading::before {
+    background-color: rgb(0 0 0 / 0.8);
   }
 }

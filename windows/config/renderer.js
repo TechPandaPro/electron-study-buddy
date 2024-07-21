@@ -291,11 +291,6 @@
     const aiAssistOverlay = document.createElement("div");
     aiAssistOverlay.classList.add("aiAssistOverlay");
 
-    //   <svg width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-    //   <path d="M11 11L129 129" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
-    //   <path d="M11 129L129 11" stroke="currentColor" stroke-width="22" stroke-linecap="round"/>
-    // </svg>
-
     aiAssistOverlay.innerHTML = `
       <div class="dashboardContainer">
         <h1>AI Question Assist</h1>
@@ -338,6 +333,8 @@
             </div>
           </div>
         </div>
+        <div class="scrollDetectTop"></div>
+        <div class="scrollDetectBottom"></div>
       </div>
     `;
 
@@ -376,6 +373,12 @@
     const genFinalBtn = genFromImgAfterContainer.querySelector("#genFinalBtn");
     const cancelFinalBtn =
       genFromImgAfterContainer.querySelector("#cancelFinalBtn");
+
+    // TODO: finish scroll detection
+    const scrollDetectTop = aiAssistOverlay.querySelector(".scrollDetectTop");
+    const scrollDetectBottom = aiAssistOverlay.querySelector(
+      ".scrollDetectBottom"
+    );
 
     electronStore
       .get("aiQuestionAssistConfig")
@@ -440,6 +443,8 @@
     });
 
     let mouseDown = false;
+    let mouseDownX;
+    let mouseDownY;
     let moving = false;
     let moveRow;
     // let moveTable;
@@ -459,6 +464,8 @@
         moveRow = e.target.parentElement;
         // moveTable = tempMoveTable;
         mouseDown = true;
+        mouseDownX = e.clientX;
+        mouseDownY = e.clientY;
         // console.log(e.target);
         // console.log(e.clientX);
         // console.log(e.clientY);
@@ -478,7 +485,15 @@
     });
 
     aiAssistOverlay.addEventListener("mousemove", (e) => {
-      if (mouseDown) {
+      console.log(e);
+      if (
+        !moving &&
+        mouseDown &&
+        Math.sqrt(
+          Math.pow(mouseDownX - e.clientX, 2) +
+            Math.pow(mouseDownY - e.clientY, 2)
+        ) > 3
+      ) {
         moving = true;
         moveRow.classList.add("moving");
       }
@@ -491,6 +506,13 @@
       ) {
         e.preventDefault();
         const hovering = e.target.parentElement;
+
+        // const hoveringRect = hovering.getBoundingClientRect();
+        // if (hoveringRect.top < 0 || hoveringRect.bottom > window.innerHeight)
+        //   hovering.scrollIntoView();
+
+        // console.log(hoveringRect);
+
         if (hovering !== moveRow) {
           const position = moveRow.compareDocumentPosition(hovering);
           if (position === Node.DOCUMENT_POSITION_FOLLOWING)
@@ -608,23 +630,44 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                   </thead>
                   <tbody></tbody>
                 </table>
-                <button class="styledButton">Import Questions</button>
+                <button class="styledButton">Import <span class="questionImportCount"></span> Questions</button>
                 <div class="additionalContext">Importing these questions will add them to your existing list of questions. Your existing questions will not be erased.</div>
               `;
               // TODO: add question count to button
 
               const tableBody = questionPreviews.querySelector("table tbody");
+              const questionImportCount = questionPreviews.querySelector(
+                ".questionImportCount"
+              );
+
+              function handleCheckInput(elem) {
+                const checkbox = elem.querySelector(".includeCheckbox");
+                if (checkbox.checked) elem.dataset.checked = true;
+                else delete elem.dataset.checked;
+
+                setQuestionImportCount();
+              }
+
+              function setQuestionImportCount() {
+                questionImportCount.innerText = tableBody
+                  .querySelectorAll(".includeCheckbox:checked")
+                  .length.toLocaleString();
+              }
 
               for (const question of parsedResponse.questions) {
-                // TODO: allow rows to be dragged around
                 const newRow = document.createElement("tr");
+                newRow.dataset.checked = true;
 
-                // TODO: allow includeElem to be checked/unchecked by simply clicking the row
                 const includeElemTd = document.createElement("td");
                 const includeElem = document.createElement("input");
                 includeElem.classList.add("includeCheckbox");
                 includeElem.type = "checkbox";
                 includeElem.checked = true;
+                // setQuestionImportCount();
+                // includeElem.addEventListener("input", setQuestionImportCount);
+                includeElem.addEventListener("input", () =>
+                  handleCheckInput(newRow)
+                );
                 includeElemTd.appendChild(includeElem);
 
                 const questionElem = document.createElement("td");
@@ -637,50 +680,23 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
 
                 tableBody.appendChild(newRow);
 
-                // let mouseDown = false;
-                // let moving = false;
-
-                // newRow.addEventListener("mousedown", handleMouseDown);
-
-                // function handleMouseDown(e) {
-                //   mouseDown = true;
-                //   document.body.addEventListener("mouseup", handleMouseUp);
-                //   document.body.addEventListener("mousemove", handleMouseMove);
-                // }
-
-                // function handleMouseUp(e) {
-                //   mouseDown = false;
-                //   moving = false;
-                //   document.body.removeEventListener("mouseup", handleMouseUp);
-                //   document.body.removeEventListener(
-                //     "mousemove",
-                //     handleMouseMove
-                //   );
-                // }
-
-                // function handleMouseMove(e) {
-                //   console.log({ x: e.clientX, y: e.clientY });
-                // }
-
                 newRow.addEventListener("click", (e) => {
                   if (moving) return;
-                  if (e.target.tagName !== "INPUT")
+                  if (e.target.tagName !== "INPUT") {
                     includeElem.checked = !includeElem.checked;
+                    console.log("changed");
+                    // setQuestionImportCount();
+                    handleCheckInput(newRow);
+                  }
                 });
               }
+
+              setQuestionImportCount();
             } else alert("An error occurred while generating the questions.");
 
             setGenFromImgLoading(false);
           });
       }
-
-      // the OpenAI API can actually just be fetched client-side
-      // fetch("/api/createQuestions", {
-      //   method: "POST",
-      //   body: genFile.files,
-      // })
-      //   .then((res) => res.json())
-      //   .then((res) => console.log(res));
     });
 
     function setGenFromImgLoading(isLoading) {
@@ -705,7 +721,6 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
       }
     }
 
-    // document.body.appendChild(aiAssistOverlay);
     document.body.insertBefore(aiAssistOverlay, mainDashboardContainer);
   });
 
