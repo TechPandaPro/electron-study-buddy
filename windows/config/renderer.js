@@ -442,6 +442,7 @@
       // FIXME: make an error/etc appear when trying to generate w/o uploading file
     });
 
+    // TODO: ensure that these variables get reset when closing
     let mouseDown = false;
     let mouseDownX;
     let mouseDownY;
@@ -455,6 +456,7 @@
       const scrollPadding = Math.min(60, 0.2 * window.innerHeight);
       return scrollPadding;
     }
+    // TODO: make scrollBy change based on mouse distance to edge
     const scrollBy = 4;
 
     let checkingScroll = false;
@@ -462,7 +464,7 @@
     // let scrollInterval = null;
 
     function checkScroll() {
-      console.log(mouseMoveY);
+      // console.log(mouseMoveY);
       const scrollPadding = getScrollPadding();
       // console.log(moving);
       // console.log("check!");
@@ -477,8 +479,13 @@
       // }
       else checkingScroll = false;
 
-      if (checkingScroll) requestAnimationFrame(checkScroll);
+      if (checkingScroll) {
+        checkMoveQuestion();
+        requestAnimationFrame(checkScroll);
+      }
     }
+
+    window.addEventListener("scroll", checkMoveQuestion);
 
     // let moveTable;
 
@@ -521,7 +528,7 @@
       }
     });
 
-    aiAssistOverlay.addEventListener("mouseleave", (e) => (mouseMoveY = null));
+    // aiAssistOverlay.addEventListener("mouseleave", (e) => (mouseMoveY = null));
 
     aiAssistOverlay.addEventListener("mousemove", (e) => {
       // console.log(e);
@@ -540,32 +547,52 @@
         moving = true;
         moveRow.classList.add("moving");
       }
+
+      if (moving) e.preventDefault();
+
+      checkMoveQuestion();
+    });
+
+    function checkMoveQuestion() {
       if (
-        moving &&
-        e.target.parentElement?.parentElement?.parentElement?.classList.contains(
-          "questionPreviewsTable"
-        ) &&
-        e.target.parentElement?.parentElement?.tagName === "TBODY"
+        // moving &&
+        // e.target.parentElement?.parentElement?.parentElement?.classList.contains(
+        //   "questionPreviewsTable"
+        // ) &&
+        // e.target.parentElement?.parentElement?.tagName === "TBODY"
+        moving
       ) {
-        e.preventDefault();
+        const scrollPadding = getScrollPadding();
+        if (
+          // !scrollInterval &&
+          !checkingScroll &&
+          (mouseMoveY < scrollPadding ||
+            window.innerHeight - mouseMoveY < scrollPadding)
+        ) {
+          // scrollInterval = setInterval(checkScroll, 16);
+          checkingScroll = true;
+          requestAnimationFrame(checkScroll);
+        }
+
+        const nearestRow = Array.from(
+          questionPreviews.querySelectorAll("tbody tr")
+        ).sort((a, b) => {
+          const aRect = a.getBoundingClientRect();
+          const aPos = aRect.top + aRect.height / 2;
+          const aDistance = Math.abs(mouseMoveY - aPos);
+
+          const bRect = b.getBoundingClientRect();
+          const bPos = bRect.top + bRect.height / 2;
+          const bDistance = Math.abs(mouseMoveY - bPos);
+
+          return aDistance - bDistance;
+        })[0];
 
         // const hoveringRect = hovering.getBoundingClientRect();
         // if (hoveringRect.top < 0 || hoveringRect.bottom > window.innerHeight)
         //   hovering.scrollIntoView();
 
         // console.log(hoveringRect);
-
-        const scrollPadding = getScrollPadding();
-        if (
-          // !scrollInterval &&
-          !checkingScroll &&
-          (e.clientY < scrollPadding ||
-            window.innerHeight - e.clientY < scrollPadding)
-        ) {
-          // scrollInterval = setInterval(checkScroll, 16);
-          checkingScroll = true;
-          requestAnimationFrame(checkScroll);
-        }
 
         // const scrollPadding = 20;
 
@@ -580,12 +607,17 @@
         //   }, 16);
         // }
 
-        const hovering = e.target.parentElement;
-        if (hovering !== moveRow) {
-          const position = moveRow.compareDocumentPosition(hovering);
+        console.log(nearestRow);
+
+        // const hovering = e.target.parentElement;
+        if (nearestRow !== moveRow) {
+          const position = moveRow.compareDocumentPosition(nearestRow);
           if (position === Node.DOCUMENT_POSITION_FOLLOWING)
-            hovering.parentElement.insertBefore(moveRow, hovering.nextSibling);
-          else hovering.parentElement.insertBefore(moveRow, hovering);
+            nearestRow.parentElement.insertBefore(
+              moveRow,
+              nearestRow.nextSibling
+            );
+          else nearestRow.parentElement.insertBefore(moveRow, nearestRow);
           // console.log(position);
           // hovering.parentElement.insertBefore(moveRow, hovering);
           // console.log("move!!");
@@ -594,7 +626,7 @@
         // console.log(e.clientX);
         // console.log(e.clientY);
       }
-    });
+    }
 
     genFinalBtn.addEventListener("click", () => {
       setGenFromImgLoading(true);
