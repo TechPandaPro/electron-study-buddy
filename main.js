@@ -287,7 +287,7 @@ function startFlashcards() {
   //       flashcardsWin.getSize()[1] - 1
   //     );
   //   });
-  // }, 20);
+  // }, 50);
   flashcardsWin.loadFile("windows/flashcards/index.html");
 
   // setQuizPosition();

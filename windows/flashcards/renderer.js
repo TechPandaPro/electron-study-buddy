@@ -6,21 +6,29 @@
   const flashcardTextFront = document.querySelector(
     "#flashcardFront .flashcardText"
   );
-  const flashcardTextBack = document.querySelector(
-    "#flashcardBack .flashcardText"
-  );
+  // const flashcardTextBack = document.querySelector(
+  //   "#flashcardBack .flashcardText"
+  // );
 
   const questions = (await electronStore.get(`questions`)) ?? [];
 
   let questionIndex = 0;
 
   flashcardTextFront.innerText = questions[questionIndex].question;
-  flashcardTextBack.innerText = questions[questionIndex].answer;
+  // flashcardTextBack.innerText = questions[questionIndex].answer;
 
   flashcard.addEventListener("click", () => {
     // if (flashcard.style.transform) flashcard.style.removeProperty("transform");
     // else flashcard.style.transform = "rotateY(-180deg)";
-    flashcard.style.transform = "rotateY(-180deg)";
+    // flashcard.style.transform = "rotateY(-180deg)";
+    flashcard.addEventListener(
+      "animationend",
+      () => {
+        flashcardTextFront.innerText = questions[questionIndex].answer;
+      },
+      { once: true }
+    );
+    flashcard.classList.add("spinning");
   });
 
   // document.body.addEventListener("keydown", (e) => {
@@ -35,16 +43,16 @@
   //   }
   // });
 
-  flashcard.addEventListener("transitionend", () => {
-    const textFront = flashcardTextFront.innerText;
-    const textBack = flashcardTextBack.innerText;
-
-    flashcardTextFront.innerText = textBack;
-    flashcardTextBack.innerText = textFront;
-
-    flashcard.style.transition = "none";
-    flashcard.style.removeProperty("transform");
-    flashcard.offsetWidth;
-    flashcard.style.removeProperty("transition");
-  });
+  // flashcard.addEventListener("transitionend", () => {
+  // const textFront = flashcardTextFront.innerText;
+  // const textBack = flashcardTextBack.innerText;
+  //
+  // flashcardTextFront.innerText = textBack;
+  // flashcardTextBack.innerText = textFront;
+  //
+  // flashcard.style.transition = "none";
+  // flashcard.style.removeProperty("transform");
+  // flashcard.offsetWidth;
+  // flashcard.style.removeProperty("transition");
+  // });
 })();
