@@ -333,8 +333,8 @@
             </div>
           </div>
         </div>
-        <div class="scrollDetectTop"></div>
-        <div class="scrollDetectBottom"></div>
+        <!-- <div class="scrollDetectTop"></div>
+        <div class="scrollDetectBottom"></div> -->
       </div>
     `;
 
@@ -375,10 +375,10 @@
       genFromImgAfterContainer.querySelector("#cancelFinalBtn");
 
     // TODO: finish scroll detection
-    const scrollDetectTop = aiAssistOverlay.querySelector(".scrollDetectTop");
-    const scrollDetectBottom = aiAssistOverlay.querySelector(
-      ".scrollDetectBottom"
-    );
+    // const scrollDetectTop = aiAssistOverlay.querySelector(".scrollDetectTop");
+    // const scrollDetectBottom = aiAssistOverlay.querySelector(
+    //   ".scrollDetectBottom"
+    // );
 
     electronStore
       .get("aiQuestionAssistConfig")
@@ -447,7 +447,44 @@
     let mouseDownY;
     let moving = false;
     let moveRow;
+
+    // let mouseMoveX;
+    let mouseMoveY = null;
+
+    function getScrollPadding() {
+      const scrollPadding = Math.min(60, 0.2 * window.innerHeight);
+      return scrollPadding;
+    }
+    const scrollBy = 4;
+
+    let checkingScroll = false;
+
+    // let scrollInterval = null;
+
+    function checkScroll() {
+      console.log(mouseMoveY);
+      const scrollPadding = getScrollPadding();
+      // console.log(moving);
+      // console.log("check!");
+      if (mouseMoveY === null) checkingScroll = false;
+      else if (moving && mouseMoveY < scrollPadding)
+        window.scrollTo(0, window.scrollY - scrollBy);
+      else if (moving && window.innerHeight - mouseMoveY < scrollPadding)
+        window.scrollTo(0, window.scrollY + scrollBy);
+      // else {
+      //   clearInterval(scrollInterval);
+      //   scrollInterval = null;
+      // }
+      else checkingScroll = false;
+
+      if (checkingScroll) requestAnimationFrame(checkScroll);
+    }
+
     // let moveTable;
+
+    // scrollDetectTop.addEventListener("mouseenter", () => {
+    //   console.log("enter");
+    // });
 
     aiAssistOverlay.addEventListener("mousedown", (e) => {
       // const tempMoveTable =
@@ -478,14 +515,20 @@
         mouseDown = false;
         moving = false;
         moveRow.classList.remove("moving");
-        console.log("up");
+        // console.log("up");
         // console.log(e.clientX);
         // console.log(e.clientY);
       }
     });
 
+    aiAssistOverlay.addEventListener("mouseleave", (e) => (mouseMoveY = null));
+
     aiAssistOverlay.addEventListener("mousemove", (e) => {
-      console.log(e);
+      // console.log(e);
+
+      // mouseMoveX = e.clientX;
+      mouseMoveY = e.clientY;
+
       if (
         !moving &&
         mouseDown &&
@@ -505,7 +548,6 @@
         e.target.parentElement?.parentElement?.tagName === "TBODY"
       ) {
         e.preventDefault();
-        const hovering = e.target.parentElement;
 
         // const hoveringRect = hovering.getBoundingClientRect();
         // if (hoveringRect.top < 0 || hoveringRect.bottom > window.innerHeight)
@@ -513,14 +555,40 @@
 
         // console.log(hoveringRect);
 
+        const scrollPadding = getScrollPadding();
+        if (
+          // !scrollInterval &&
+          !checkingScroll &&
+          (e.clientY < scrollPadding ||
+            window.innerHeight - e.clientY < scrollPadding)
+        ) {
+          // scrollInterval = setInterval(checkScroll, 16);
+          checkingScroll = true;
+          requestAnimationFrame(checkScroll);
+        }
+
+        // const scrollPadding = 20;
+
+        // if (
+        //   e.clientY < scrollPadding ||
+        //   window.innerHeight - e.clientY < scrollPadding
+        // ) {
+        //   console.log("yup!");
+        //   scrollInterval = setInterval(() => {
+        //     if (e.clientY < scrollPadding)
+        //       window.scrollTo(0, window.scrollY - 1);
+        //   }, 16);
+        // }
+
+        const hovering = e.target.parentElement;
         if (hovering !== moveRow) {
           const position = moveRow.compareDocumentPosition(hovering);
           if (position === Node.DOCUMENT_POSITION_FOLLOWING)
             hovering.parentElement.insertBefore(moveRow, hovering.nextSibling);
           else hovering.parentElement.insertBefore(moveRow, hovering);
-          console.log(position);
+          // console.log(position);
           // hovering.parentElement.insertBefore(moveRow, hovering);
-          console.log("move!!");
+          // console.log("move!!");
         }
         // console.log("move");
         // console.log(e.clientX);

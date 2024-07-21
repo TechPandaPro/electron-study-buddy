@@ -550,7 +550,7 @@ table#questions tbody tr:last-of-type .removeBtn {
   box-sizing: border-box;
 }
 
-.scrollDetectTop,
+/* .scrollDetectTop,
 .scrollDetectBottom {
   position: absolute;
   left: 0;
@@ -558,8 +558,10 @@ table#questions tbody tr:last-of-type .removeBtn {
   width: 100%;
   height: min(60px, 20%);
 
-  /* background-color: blue; */
-}
+  background-color: blue;
+
+  pointer-events: none;
+} */
 
 .scrollDetectTop {
   top: 0;
