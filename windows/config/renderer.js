@@ -322,7 +322,7 @@
               <div id="questionPreviews" class="hidden"></div>
               <div>
                 <label for="customInstructions" class="styledLabel">Custom Instructions:</label>
-                <div class="additionalTextareaContext">Custom instructions are useful if you want to refine the generated questions to better match your use case. These instructions will be sent to GPT when generating questions.</div>
+                <div class="additionalContext">Custom instructions are useful if you want to refine the generated questions to better match your use case. These instructions will be sent to GPT when generating questions.</div>
                 <textarea id="customInstructions" class="styledTextarea" rows="3" placeholder="Example: Only pull from the vocabulary section of the material. Indented lines are continuations of previous lines."></textarea>
                 <!-- <input type="text" id="customInstructions" class="styledTextInput" /> -->
               </div>
@@ -442,17 +442,24 @@
     let mouseDown = false;
     let moving = false;
     let moveRow;
+    // let moveTable;
 
     aiAssistOverlay.addEventListener("mousedown", (e) => {
+      // const tempMoveTable =
+      //   e.target.parentElement?.parentElement?.parentElement;
+
       if (
         e.target.tagName !== "INPUT" &&
-        e.target.parentElement.parentElement.parentElement.classList.contains(
+        // tempMoveTable?.classList.contains("questionPreviewsTable")
+        e.target.parentElement?.parentElement?.parentElement?.classList.contains(
           "questionPreviewsTable"
         )
       ) {
+        e.preventDefault();
         moveRow = e.target.parentElement;
+        // moveTable = tempMoveTable;
         mouseDown = true;
-        console.log(e.target);
+        // console.log(e.target);
         // console.log(e.clientX);
         // console.log(e.clientY);
       }
@@ -460,8 +467,10 @@
 
     aiAssistOverlay.addEventListener("mouseup", (e) => {
       if (mouseDown) {
+        e.preventDefault();
         mouseDown = false;
         moving = false;
+        moveRow.classList.remove("moving");
         console.log("up");
         // console.log(e.clientX);
         // console.log(e.clientY);
@@ -469,11 +478,31 @@
     });
 
     aiAssistOverlay.addEventListener("mousemove", (e) => {
-      if (mouseDown) moving = true;
-      if (moving) {
-        console.log("move");
-        console.log(e.clientX);
-        console.log(e.clientY);
+      if (mouseDown) {
+        moving = true;
+        moveRow.classList.add("moving");
+      }
+      if (
+        moving &&
+        e.target.parentElement?.parentElement?.parentElement?.classList.contains(
+          "questionPreviewsTable"
+        ) &&
+        e.target.parentElement?.parentElement?.tagName === "TBODY"
+      ) {
+        e.preventDefault();
+        const hovering = e.target.parentElement;
+        if (hovering !== moveRow) {
+          const position = moveRow.compareDocumentPosition(hovering);
+          if (position === Node.DOCUMENT_POSITION_FOLLOWING)
+            hovering.parentElement.insertBefore(moveRow, hovering.nextSibling);
+          else hovering.parentElement.insertBefore(moveRow, hovering);
+          console.log(position);
+          // hovering.parentElement.insertBefore(moveRow, hovering);
+          console.log("move!!");
+        }
+        // console.log("move");
+        // console.log(e.clientX);
+        // console.log(e.clientY);
       }
     });
 
@@ -579,7 +608,10 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                   </thead>
                   <tbody></tbody>
                 </table>
+                <button class="styledButton">Import Questions</button>
+                <div class="additionalContext">Importing these questions will add them to your existing list of questions. Your existing questions will not be erased.</div>
               `;
+              // TODO: add question count to button
 
               const tableBody = questionPreviews.querySelector("table tbody");
 

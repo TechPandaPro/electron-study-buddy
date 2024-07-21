@@ -55,7 +55,7 @@ h1:first-child {
 }
 
 .additionalConfigContext,
-.additionalTextareaContext {
+.additionalContext {
   display: block;
   font-size: 0.9em;
   color: rgb(86 86 86);
@@ -65,9 +65,16 @@ h1:first-child {
   padding: 2px 0 0 30px;
 }
 
-.additionalTextareaContext {
+.additionalContext {
   padding: 0 5px;
+}
+
+label + .additionalContext {
   margin-bottom: 5px;
+}
+
+button + .additionalContext {
+  margin-top: 5px;
 }
 
 #saveBtnContainer {
@@ -190,6 +197,10 @@ table.questionPreviewsTable {
   width: 100%;
 }
 
+.questionPreviewsTable {
+  margin-bottom: 5px;
+}
+
 table#questions tr th:first-of-type,
 table#questions tr td:first-of-type {
   padding-left: 10px;
@@ -255,6 +266,20 @@ table#questions tbody tr td:nth-of-type(2) {
 
 table.questionPreviewsTable tbody tr {
   cursor: move;
+}
+
+table.questionPreviewsTable tbody tr.moving {
+  opacity: 0.5;
+  /* background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(128 128 128 / 0.15) 0px,
+    rgb(128 128 128 / 0.15) 25px,
+    rgb(255 255 255) 25px,
+    rgb(255 255 255) 50px
+  );
+  background-size: 200%; */
+  /* background-position: 0% 0%; */
+  /* animation: trMovingAnim 1s infinite; */
 }
 
 .includeCheckbox {
@@ -528,6 +553,38 @@ table#questions tbody tr:last-of-type .removeBtn {
   }
 }
 
+/* @keyframes trMovingAnim {
+  from {
+    background-position: 0% 0%;
+  }
+
+  to {
+    background-position: 100% 0%;
+  }
+} */
+
+/* @keyframes trMovingAnim {
+  from {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgb(128 128 128 / 0.15) 0px,
+      rgb(128 128 128 / 0.15) 25px,
+      rgb(255 255 255) 25px,
+      rgb(255 255 255) 50px
+    );
+  }
+
+  to {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgb(128 128 128 / 0.15) 25px,
+      rgb(128 128 128 / 0.15) 50px,
+      rgb(255 255 255) 50px,
+      rgb(255 255 255) 75px
+    );
+  }
+} */
+
 @media (prefers-color-scheme: dark) {
   body {
     background-color: rgb(10 10 10);
@@ -535,7 +592,7 @@ table#questions tbody tr:last-of-type .removeBtn {
   }
 
   .additionalConfigContext,
-  .additionalTextareaContext {
+  .additionalContext {
     color: rgb(169 169 169);
   }
 }
