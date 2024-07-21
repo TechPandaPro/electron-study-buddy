@@ -54,12 +54,20 @@ h1:first-child {
   border-radius: 4px;
 }
 
-.additionalConfigContext {
+.additionalConfigContext,
+.additionalTextareaContext {
   display: block;
-  padding: 2px 0 0 30px;
   font-size: 0.9em;
-  /* font-style: italic; */
   color: rgb(86 86 86);
+}
+
+.additionalConfigContext {
+  padding: 2px 0 0 30px;
+}
+
+.additionalTextareaContext {
+  padding: 0 5px;
+  margin-bottom: 5px;
 }
 
 #saveBtnContainer {
@@ -245,6 +253,14 @@ table#questions tbody tr td:nth-of-type(2) {
   padding-left: 8px;
 }
 
+table.questionPreviewsTable tbody tr {
+  cursor: move;
+}
+
+.includeCheckbox {
+  cursor: pointer;
+}
+
 .customInputWrapper {
   position: relative;
 }
@@ -380,13 +396,15 @@ table#questions tbody tr:last-of-type .removeBtn {
   margin-bottom: 5px;
 }
 
-.styledTextInput {
+.styledTextInput,
+.styledTextarea {
   display: block;
 
   background-color: transparent;
   outline: none;
   color: inherit;
   font-size: 0.95em;
+  font-family: inherit;
 
   border: 2px solid rgb(100 100 100);
   border-radius: 6px;
@@ -396,11 +414,13 @@ table#questions tbody tr:last-of-type .removeBtn {
   transition: border-color 0.2s;
 }
 
-.styledTextInput:hover {
+.styledTextInput:hover,
+.styledTextarea:hover {
   border-color: rgb(128 128 128);
 }
 
-.styledTextInput:focus {
+.styledTextInput:focus,
+.styledTextarea:focus {
   border-color: rgb(225 225 225);
 }
 
@@ -490,6 +510,14 @@ table#questions tbody tr:last-of-type .removeBtn {
   background-color: #ffffff;
 }
 
+#customInstructions {
+  width: 100%;
+  min-height: 50px;
+  max-height: 150px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
 @keyframes loaderSpin {
   from {
     transform: translate(-50%, -50%) rotate(0);
@@ -506,7 +534,8 @@ table#questions tbody tr:last-of-type .removeBtn {
     color: rgb(245 245 245);
   }
 
-  .additionalConfigContext {
+  .additionalConfigContext,
+  .additionalTextareaContext {
     color: rgb(169 169 169);
   }
 }

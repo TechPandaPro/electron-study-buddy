@@ -321,6 +321,12 @@
               <div id="filePreviews" class="hidden"></div>
               <div id="questionPreviews" class="hidden"></div>
               <div>
+                <label for="customInstructions" class="styledLabel">Custom Instructions:</label>
+                <div class="additionalTextareaContext">Custom instructions are useful if you want to refine the generated questions to better match your use case. These instructions will be sent to GPT when generating questions.</div>
+                <textarea id="customInstructions" class="styledTextarea" rows="3" placeholder="Example: Only pull from the vocabulary section of the material. Indented lines are continuations of previous lines."></textarea>
+                <!-- <input type="text" id="customInstructions" class="styledTextInput" /> -->
+              </div>
+              <div>
                 <input type="checkbox" id="createNewQuestions" />
                 <label for="createNewQuestions">Create New Questions</label>
                 <div class="additionalConfigContext">AI Question Assist can create new questions based upon the content within your image. If unselected, questions will only be pulled directly from the content within the image. (The former ensures more versatility, whereas the latter ensures better accuracy and relevance.)</div>
@@ -335,23 +341,15 @@
       </div>
     `;
 
-    // <div id="quizShowIncorrectConfigContainer">
-    //   <input type="checkbox" id="quizShowIncorrect" />
-    //   <label for="quizShowIncorrect"
-    //     >Show incorrect quiz answer submissions</label
-    //   >
-    //   <div class="additionalConfigContext">
-    //     This is useful if you want to look at your response again after
-    //     discovering that it was incorrect.
-    //   </div>
-    // </div>
-
     const exitAssistBtn = aiAssistOverlay.querySelector(".exitAssistBtn");
     exitAssistBtn.addEventListener("click", () => {
       aiAssistOverlay.remove();
     });
 
     const openAiApiKeyInput = aiAssistOverlay.querySelector("#openAiApiKey");
+    const customInstructions = aiAssistOverlay.querySelector(
+      "#customInstructions"
+    );
 
     // const genFromImgContainer = aiAssistOverlay.querySelector(
     //   ".genFromImgContainer"
@@ -381,27 +379,28 @@
 
     electronStore
       .get("aiQuestionAssistConfig")
-      .then((aiQuestionAssistConfig) => {
-        if ("openAiApiKey" in (aiQuestionAssistConfig ?? {}))
+      .then((aiQuestionAssistConfig = {}) => {
+        if (aiQuestionAssistConfig.openAiApiKey)
           openAiApiKeyInput.value = aiQuestionAssistConfig.openAiApiKey;
+        if (aiQuestionAssistConfig.customInstructions)
+          customInstructions.value = aiQuestionAssistConfig.customInstructions;
       });
 
     openAiApiKeyInput.addEventListener("change", async () => {
-      await electronStore.set("aiQuestionAssistConfig", {
-        openAiApiKey: openAiApiKeyInput.value,
-      });
+      const aiQuestionAssistConfig =
+        (await electronStore.get("aiQuestionAssistConfig")) ?? {};
+      aiQuestionAssistConfig.openAiApiKey = openAiApiKeyInput.value;
+      await electronStore.set("aiQuestionAssistConfig", aiQuestionAssistConfig);
+    });
+
+    customInstructions.addEventListener("change", async () => {
+      const aiQuestionAssistConfig =
+        (await electronStore.get("aiQuestionAssistConfig")) ?? {};
+      aiQuestionAssistConfig.customInstructions = customInstructions.value;
+      await electronStore.set("aiQuestionAssistConfig", aiQuestionAssistConfig);
     });
 
     genFromImgBtn.addEventListener("click", () => {
-      // const fileUpload = document.createElement("input");
-      // fileUpload.type = "file";
-      //
-      // const generateBtn = document.createElement("button");
-      // generateBtn.classList.add("styledButton");
-      // generateBtn.innerText = "Generate";
-      //
-      // genFromImgContainer.append(fileUpload, generateBtn);
-
       genFromImgBeforeContainer.classList.add("hidden");
       genFromImgAfterContainer.classList.remove("hidden");
     });
@@ -437,6 +436,45 @@
 
         filePreviews.classList.remove("hidden");
       } else filePreviews.classList.add("hidden");
+      // FIXME: make an error/etc appear when trying to generate w/o uploading file
+    });
+
+    let mouseDown = false;
+    let moving = false;
+    let moveRow;
+
+    aiAssistOverlay.addEventListener("mousedown", (e) => {
+      if (
+        e.target.tagName !== "INPUT" &&
+        e.target.parentElement.parentElement.parentElement.classList.contains(
+          "questionPreviewsTable"
+        )
+      ) {
+        moveRow = e.target.parentElement;
+        mouseDown = true;
+        console.log(e.target);
+        // console.log(e.clientX);
+        // console.log(e.clientY);
+      }
+    });
+
+    aiAssistOverlay.addEventListener("mouseup", (e) => {
+      if (mouseDown) {
+        mouseDown = false;
+        moving = false;
+        console.log("up");
+        // console.log(e.clientX);
+        // console.log(e.clientY);
+      }
+    });
+
+    aiAssistOverlay.addEventListener("mousemove", (e) => {
+      if (mouseDown) moving = true;
+      if (moving) {
+        console.log("move");
+        console.log(e.clientX);
+        console.log(e.clientY);
+      }
     });
 
     genFinalBtn.addEventListener("click", () => {
@@ -500,7 +538,7 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                 content: [
                   {
                     type: "text",
-                    text: "Generate the questions and answers.", // Only pull from the vocabulary.
+                    text: `Generate the questions and answers. ${customInstructions.value}`,
                   },
                   ...imageDataUrls.map((dataUrl) => ({
                     type: "image_url",
@@ -552,6 +590,7 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                 // TODO: allow includeElem to be checked/unchecked by simply clicking the row
                 const includeElemTd = document.createElement("td");
                 const includeElem = document.createElement("input");
+                includeElem.classList.add("includeCheckbox");
                 includeElem.type = "checkbox";
                 includeElem.checked = true;
                 includeElemTd.appendChild(includeElem);
@@ -565,6 +604,37 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                 newRow.append(includeElemTd, questionElem, answerElem);
 
                 tableBody.appendChild(newRow);
+
+                // let mouseDown = false;
+                // let moving = false;
+
+                // newRow.addEventListener("mousedown", handleMouseDown);
+
+                // function handleMouseDown(e) {
+                //   mouseDown = true;
+                //   document.body.addEventListener("mouseup", handleMouseUp);
+                //   document.body.addEventListener("mousemove", handleMouseMove);
+                // }
+
+                // function handleMouseUp(e) {
+                //   mouseDown = false;
+                //   moving = false;
+                //   document.body.removeEventListener("mouseup", handleMouseUp);
+                //   document.body.removeEventListener(
+                //     "mousemove",
+                //     handleMouseMove
+                //   );
+                // }
+
+                // function handleMouseMove(e) {
+                //   console.log({ x: e.clientX, y: e.clientY });
+                // }
+
+                newRow.addEventListener("click", (e) => {
+                  if (moving) return;
+                  if (e.target.tagName !== "INPUT")
+                    includeElem.checked = !includeElem.checked;
+                });
               }
             } else alert("An error occurred while generating the questions.");
 
@@ -586,7 +656,7 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
         genFromImgAfterContainer.classList.add("loading");
 
         for (const toDisable of genFromImgAfterContainer.querySelectorAll(
-          "input, button"
+          "input, textarea, button"
         )) {
           toDisable.disabled = true;
           toDisable.dataset.disabledWhileLoading = true;
