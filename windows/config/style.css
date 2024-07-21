@@ -176,7 +176,8 @@ h1:first-child {
   transform: translate(-50%, -50%) scale(0.7);
 }
 
-table#questions {
+table#questions,
+table.questionPreviewsTable {
   border-collapse: collapse;
   width: 100%;
 }
@@ -192,11 +193,13 @@ table#questions tr td:last-of-type {
   box-sizing: border-box;
 }
 
-table#questions thead .thInner {
+table#questions thead .thInner,
+table.questionPreviewsTable thead .thInner {
   position: relative;
 }
 
-table#questions thead .thInner::after {
+table#questions thead .thInner::after,
+table.questionPreviewsTable thead .thInner::after {
   content: "";
   display: block;
   position: absolute;
@@ -216,13 +219,22 @@ table#questions thead .thInner::after {
   );
 }
 
-table#questions tbody tr:nth-child(even) {
+table#questions tbody tr:nth-child(even),
+table.questionPreviewsTable tbody tr:nth-child(even) {
   background-color: rgb(128 128 128 / 0.15);
 }
 
 table#questions th,
-table#questions td {
+table#questions td,
+table.questionPreviewsTable th,
+table.questionPreviewsTable td {
   padding: 5px;
+}
+
+/* TODO: make `table.questionPreviewsTable tr` pointer on hover (for enable/disabling and moving) */
+
+table.questionPreviewsTable thead tr th:not(:first-of-type) {
+  width: 50%;
 }
 
 table#questions tbody tr td:nth-of-type(1) {
@@ -427,7 +439,8 @@ table#questions tbody tr:last-of-type .removeBtn {
 
 .genFromImgBeforeContainer.hidden,
 .genFromImgAfterContainer.hidden,
-#filePreviews.hidden {
+#filePreviews.hidden,
+#questionPreviews.hidden {
   display: none;
 }
 

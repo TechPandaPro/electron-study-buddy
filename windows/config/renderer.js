@@ -319,6 +319,7 @@
                 <input type="file" id="genFile" accept=".png, .jpeg, .jpg, .webp" multiple />
               </div>
               <div id="filePreviews" class="hidden"></div>
+              <div id="questionPreviews" class="hidden"></div>
               <div>
                 <input type="checkbox" id="createNewQuestions" />
                 <label for="createNewQuestions">Create New Questions</label>
@@ -369,12 +370,27 @@
     const genFile = genFromImgAfterContainer.querySelector("#genFile");
     const filePreviews =
       genFromImgAfterContainer.querySelector("#filePreviews");
+    const questionPreviews =
+      genFromImgAfterContainer.querySelector("#questionPreviews");
     const createNewQuestions = genFromImgAfterContainer.querySelector(
       "#createNewQuestions"
     );
     const genFinalBtn = genFromImgAfterContainer.querySelector("#genFinalBtn");
     const cancelFinalBtn =
       genFromImgAfterContainer.querySelector("#cancelFinalBtn");
+
+    electronStore
+      .get("aiQuestionAssistConfig")
+      .then((aiQuestionAssistConfig) => {
+        if ("openAiApiKey" in (aiQuestionAssistConfig ?? {}))
+          openAiApiKeyInput.value = aiQuestionAssistConfig.openAiApiKey;
+      });
+
+    openAiApiKeyInput.addEventListener("change", async () => {
+      await electronStore.set("aiQuestionAssistConfig", {
+        openAiApiKey: openAiApiKeyInput.value,
+      });
+    });
 
     genFromImgBtn.addEventListener("click", () => {
       // const fileUpload = document.createElement("input");
@@ -392,8 +408,13 @@
 
     cancelFinalBtn.addEventListener("click", () => {
       genFile.value = "";
+
       filePreviews.innerHTML = "";
       filePreviews.classList.add("hidden");
+
+      questionPreviews.innerHTML = "";
+      questionPreviews.classList.add("hidden");
+
       createNewQuestions.checked = false;
 
       genFromImgBeforeContainer.classList.remove("hidden");
@@ -402,13 +423,8 @@
 
     genFile.addEventListener("change", () => {
       filePreviews.innerHTML = "";
-      if (genFile.files.length >= 1) {
-        const fileNames = Array.from(genFile.files)
-          .map((file) => file.name)
-          .join(", ");
-        console.log(fileNames);
 
-        // FIXME: resize these images
+      if (genFile.files.length >= 1) {
         for (const image of genFile.files) {
           const imageElem = document.createElement("img");
           imageElem.classList.add("filePreview");
@@ -424,31 +440,7 @@
     });
 
     genFinalBtn.addEventListener("click", () => {
-      genFromImgAfterContainer.classList.add("loading");
-
-      // const tempCanvas = document.createElement("canvas");
-      // const tempCtx = tempCanvas.getContext("2d");
-
-      // const imageDataUrls = Array.from(
-      //   filePreviews.querySelectorAll(".filePreview")
-      // ).map((image) => {
-      //   tempCanvas.width = image.naturalWidth;
-      //   tempCanvas.height = image.naturalHeight;
-      //   tempCtx.drawImage(image, 0, 0, tempCanvas.width, tempCanvas.height);
-      //   return tempCanvas.toDataURL();
-      // });
-
-      // const imageDataUrls = Array.from(genFile.files).map((file) => {
-      //   const reader = new FileReader();
-      //   reader.addEventListener(
-      //     "load",
-      //     (e) => {
-      //       console.log(e.target.result);
-      //     },
-      //     { once: true }
-      //   );
-      //   reader.readAsDataURL(file);
-      // });
+      setGenFromImgLoading(true);
 
       const fileCount = genFile.files.length;
       const imageDataUrls = [];
@@ -467,14 +459,12 @@
         reader.readAsDataURL(file);
       }
 
-      console.log(imageDataUrls);
-
       // FIXME: handle lack of API key err
       // FIXME: make "create new questions" checkbox functional
       // TODO: add customization (messages[1].content[0].text)
       // TODO: add option to ignore punctuation/capitalization/etc. (enabled by default)
-      // TODO: make API key save
       // TODO: add disclaimer/note to double check the content that AI Question Assist produces
+      // TODO: disable inputs when questions are generating
 
       function sendDataUrls() {
         fetch("https://api.openai.com/v1/chat/completions", {
@@ -490,7 +480,11 @@
                 role: "system",
                 content: `You are an AI studying assistant. Your task is to analyze images of curriculum materials and use this as the basis for generating relevant questions and answers. These questions and answers should be suitable for studying purposes. When creating these questions and answers, focus on providing concise, flashcard-style content. For questions, use brief phrases or single words when possible, rather than full sentences. The answers should be equally succinct. Your goal is to create a set of study materials that are easy to review and memorize, conveying the key points from the curriculum materials presented in the images.
 
-Only pull questions directly from the material provided. Refrain from utilizing your own knowledgebase to generate questions. Assume that the material provided is factual and the only reference.
+${
+  createNewQuestions.checked
+    ? `You should aim to invent new questions based upon the material provided. Utilizing your own teaching skills, you should create questions that build upon the material being studied.`
+    : `Only pull questions directly from the material provided. Refrain from utilizing your own knowledgebase to generate questions. Assume that the material provided is factual and the only reference.`
+}
 
 Respond with a JSON object containing an array of question and answer pairs. Each pair should be an object with a \`question\` and \`answer\` key. Your response should be directly parsable, and should not be within a code block. The format should be as follows:
 
@@ -530,9 +524,51 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
               console.error("Error parsing response");
             }
 
+            // FIXME: errors need to be caught here, too
             if (parsedResponse) {
               console.log(parsedResponse);
+
+              questionPreviews.classList.remove("hidden");
+
+              questionPreviews.innerHTML = `
+                <table class="questionPreviewsTable">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th><div class="thInner">Question</div></th>
+                      <th><div class="thInner">Answer</div></th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              `;
+
+              const tableBody = questionPreviews.querySelector("table tbody");
+
+              for (const question of parsedResponse.questions) {
+                // TODO: allow rows to be dragged around
+                const newRow = document.createElement("tr");
+
+                // TODO: allow includeElem to be checked/unchecked by simply clicking the row
+                const includeElemTd = document.createElement("td");
+                const includeElem = document.createElement("input");
+                includeElem.type = "checkbox";
+                includeElem.checked = true;
+                includeElemTd.appendChild(includeElem);
+
+                const questionElem = document.createElement("td");
+                questionElem.innerText = question.question;
+
+                const answerElem = document.createElement("td");
+                answerElem.innerText = question.answer;
+
+                newRow.append(includeElemTd, questionElem, answerElem);
+
+                tableBody.appendChild(newRow);
+              }
             } else alert("An error occurred while generating the questions.");
+
+            setGenFromImgLoading(false);
           });
       }
 
@@ -544,6 +580,28 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
       //   .then((res) => res.json())
       //   .then((res) => console.log(res));
     });
+
+    function setGenFromImgLoading(isLoading) {
+      if (isLoading) {
+        genFromImgAfterContainer.classList.add("loading");
+
+        for (const toDisable of genFromImgAfterContainer.querySelectorAll(
+          "input, button"
+        )) {
+          toDisable.disabled = true;
+          toDisable.dataset.disabledWhileLoading = true;
+        }
+      } else {
+        genFromImgAfterContainer.classList.remove("loading");
+
+        for (const toDisable of genFromImgAfterContainer.querySelectorAll(
+          "[data-disabled-while-loading]"
+        )) {
+          toDisable.disabled = false;
+          delete toDisable.dataset.disabledWhileLoading;
+        }
+      }
+    }
 
     // document.body.appendChild(aiAssistOverlay);
     document.body.insertBefore(aiAssistOverlay, mainDashboardContainer);
