@@ -470,8 +470,11 @@
       console.log(imageDataUrls);
 
       // FIXME: handle lack of API key err
-      // FIXME: make "create new options" button functional
-      // FIXME: add customization (messages[1].content[0].text)
+      // FIXME: make "create new questions" checkbox functional
+      // TODO: add customization (messages[1].content[0].text)
+      // TODO: add option to ignore punctuation/capitalization/etc. (enabled by default)
+      // TODO: make API key save
+      // TODO: add disclaimer/note to double check the content that AI Question Assist produces
 
       function sendDataUrls() {
         fetch("https://api.openai.com/v1/chat/completions", {
@@ -487,24 +490,23 @@
                 role: "system",
                 content: `You are an AI studying assistant. Your task is to analyze images of curriculum materials and use this as the basis for generating relevant questions and answers. These questions and answers should be suitable for studying purposes. When creating these questions and answers, focus on providing concise, flashcard-style content. For questions, use brief phrases or single words when possible, rather than full sentences. The answers should be equally succinct. Your goal is to create a set of study materials that are easy to review and memorize, conveying the key points from the curriculum materials presented in the images.
 
-Only pull questions directly from the material provided. Refrain from utilizing your own knowledgebase or interpretation to generate questions. Assume that the material provided is factual and the only reference.
+Only pull questions directly from the material provided. Refrain from utilizing your own knowledgebase to generate questions. Assume that the material provided is factual and the only reference.
 
-Respond with a JSON object containing an array of question and answer pairs. Each pair should be an object with a \`question\` and \`answer\` key. Both values should be arrays with at least one string. Avoid including non-pertinent punctuation such as ellipses, as these can vary between users. If necessary, the \`question\` and \`answer\` values should contain multiple variations of the correct question and answer. These variations exist so that, if the user types a unique but correct variation of the correct answer, it will still be marked as correct. Your response should be directly parsable, and should not be within a code block. The format should be as follows:
+Respond with a JSON object containing an array of question and answer pairs. Each pair should be an object with a \`question\` and \`answer\` key. Your response should be directly parsable, and should not be within a code block. The format should be as follows:
 
 {
   "questions": [
-    { "question": [ "foo" ], "answer": [ "bar", "bar!" ] },
-    { "question": [ "baz" ], "answer": [ "qux" ] }
+    { "question": "foo", "answer": "bar" },
+    { "question": "baz", "answer": "qux" }
   ]
 }`,
-                // Respond with a JSON object containing an array of question and answer pairs. Each pair should be an object with a \`question\` and \`answer\` key. Both values should be arrays with at least one string. If necessary, these properties should contain multiple variations of the correct question and answer. These variations exist so that, if the user types a unique but correct variation of the correct answer, it will still be marked as correct. Your response should be directly parsable, and should not be within a code block. The format should be as follows:
               },
               {
                 role: "user",
                 content: [
                   {
                     type: "text",
-                    text: "Generate the questions and answers. Only pull from the vocabulary.",
+                    text: "Generate the questions and answers.", // Only pull from the vocabulary.
                   },
                   ...imageDataUrls.map((dataUrl) => ({
                     type: "image_url",
