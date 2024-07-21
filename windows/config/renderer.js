@@ -310,8 +310,8 @@
             </div>
             <div class="genFromImgAfterContainer hidden">
               <div>
-                <label for="genFile" class="styledButton">Upload File</label>
                 <input type="file" id="genFile" accept=".png, .jpeg, .jpg, .webp" multiple />
+                <label for="genFile" class="styledButton">Upload File</label>
               </div>
               <div id="filePreviews" class="hidden"></div>
               <div id="questionPreviews" class="hidden">
@@ -379,11 +379,7 @@
     const cancelFinalBtn =
       genFromImgAfterContainer.querySelector("#cancelFinalBtn");
 
-    // TODO: finish scroll detection
-    // const scrollDetectTop = aiAssistOverlay.querySelector(".scrollDetectTop");
-    // const scrollDetectBottom = aiAssistOverlay.querySelector(
-    //   ".scrollDetectBottom"
-    // );
+    // TODO: maybe stop scrolling once reaching top/bottom of chart
 
     electronStore
       .get("aiQuestionAssistConfig")
@@ -461,10 +457,8 @@
       const scrollPadding = Math.min(80, 0.2 * window.innerHeight);
       return scrollPadding;
     }
-    // TODO: make scrollBy change based on mouse distance to edge
-    function getScrollBy() {
-      // const scrollBy = 4;
 
+    function getScrollBy() {
       const scrollPadding = getScrollPadding();
 
       const distanceToEdge =
@@ -479,8 +473,6 @@
 
     let checkingScroll = false;
 
-    // let scrollInterval = null;
-
     function checkScroll() {
       // console.log(mouseMoveY);
       const scrollPadding = getScrollPadding();
@@ -492,10 +484,6 @@
         window.scrollTo(0, window.scrollY - scrollBy);
       else if (moving && window.innerHeight - mouseMoveY < scrollPadding)
         window.scrollTo(0, window.scrollY + scrollBy);
-      // else {
-      //   clearInterval(scrollInterval);
-      //   scrollInterval = null;
-      // }
       else checkingScroll = false;
 
       if (checkingScroll) {
@@ -583,12 +571,10 @@
       ) {
         const scrollPadding = getScrollPadding();
         if (
-          // !scrollInterval &&
           !checkingScroll &&
           (mouseMoveY < scrollPadding ||
             window.innerHeight - mouseMoveY < scrollPadding)
         ) {
-          // scrollInterval = setInterval(checkScroll, 16);
           checkingScroll = true;
           requestAnimationFrame(checkScroll);
         }
@@ -606,25 +592,6 @@
 
           return aDistance - bDistance;
         })[0];
-
-        // const hoveringRect = hovering.getBoundingClientRect();
-        // if (hoveringRect.top < 0 || hoveringRect.bottom > window.innerHeight)
-        //   hovering.scrollIntoView();
-
-        // console.log(hoveringRect);
-
-        // const scrollPadding = 20;
-
-        // if (
-        //   e.clientY < scrollPadding ||
-        //   window.innerHeight - e.clientY < scrollPadding
-        // ) {
-        //   console.log("yup!");
-        //   scrollInterval = setInterval(() => {
-        //     if (e.clientY < scrollPadding)
-        //       window.scrollTo(0, window.scrollY - 1);
-        //   }, 16);
-        // }
 
         console.log(nearestRow);
 
@@ -672,7 +639,6 @@
       // TODO: add customization (messages[1].content[0].text)
       // TODO: add option to ignore punctuation/capitalization/etc. (enabled by default)
       // TODO: add disclaimer/note to double check the content that AI Question Assist produces
-      // TODO: disable inputs when questions are generating
 
       function sendDataUrls() {
         fetch("https://api.openai.com/v1/chat/completions", {
@@ -752,7 +718,6 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                 <button class="importBtn styledButton">Import <span class="questionImportCount"></span> Questions</button>
                 <div class="additionalContext">Importing these questions will add them to your existing list of questions. Your existing questions will not be erased.</div>
               `;
-              // TODO: add question count to button
 
               const tableBody =
                 questionPreviewsInner.querySelector("table tbody");
@@ -762,7 +727,34 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                 ".questionImportCount"
               );
 
-              importBtn.addEventListener("click", () => {
+              importBtn.addEventListener("click", async () => {
+                for (const toDisable of questionPreviewsInner.querySelectorAll(
+                  "input, button"
+                ))
+                  toDisable.disabled = true;
+
+                genFinalBtn.disabled = true;
+                cancelFinalBtn.disabled = true;
+
+                // TODO: consider distinguishing AI-generated questions from manually created questions (on main dashboard)
+                // TODO: check import overlaps and automatically disable
+
+                // const newQuestions = [{ question: "foo", answer: "bar" }];
+                const newQuestions = Array.from(
+                  questionPreviewsInner.querySelectorAll("tbody tr")
+                )
+                  .filter((row) => row.dataset.checked)
+                  .map((row) => ({
+                    question: row.querySelector("td:nth-of-type(2)").innerText,
+                    answer: row.querySelector("td:nth-of-type(3)").innerText,
+                  }));
+
+                const oldQuestions =
+                  (await electronStore.get("questions")) ?? [];
+                questions = [...oldQuestions, ...newQuestions];
+                await electronStore.set("questions", questions);
+                resetDisplayedConfig();
+
                 questionPreviews.style.height = `${questionPreviews.offsetHeight}px`;
                 questionPreviews.offsetHeight;
                 // questionPreviews.addEventListener("transitionstart", () =>
@@ -774,8 +766,28 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
                   () => {
                     questionPreviews.style.removeProperty("height");
                     setTimeout(() => {
+                      questionPreviews.addEventListener(
+                        "transitionend",
+                        handleTransitionEnd
+                      );
+
                       questionPreviews.classList.add("removing");
-                    }, 1000);
+
+                      function handleTransitionEnd(e) {
+                        if (e.propertyName === "opacity") return;
+                        questionPreviews.classList.add("hidden");
+                        questionPreviews.classList.remove("importSuccess");
+                        questionPreviews.classList.remove("removing");
+                        questionPreviewsInner.innerHTML = "";
+                        questionPreviews.removeEventListener(
+                          "transitionend",
+                          handleTransitionEnd
+                        );
+
+                        genFinalBtn.disabled = false;
+                        cancelFinalBtn.disabled = false;
+                      }
+                    }, 1500);
                   },
                   { once: true }
                 );

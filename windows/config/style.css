@@ -36,19 +36,23 @@ h1:first-child {
   transition: background-color 0.2s, opacity 0.2s;
 }
 
-.styledButton:enabled {
+.styledButton:enabled,
+label.styledButton {
   cursor: pointer;
 }
 
-.styledButton:enabled:hover {
+.styledButton:enabled:hover,
+label.styledButton:hover {
   background-color: rgb(135 206 235 / 0.37);
 }
 
-.styledButton:enabled:active {
+.styledButton:enabled:active,
+label.styledButton:active {
   background-color: rgb(135 206 235 / 0.25);
 }
 
-.styledButton:disabled {
+.styledButton:disabled,
+input:disabled + label.styledButton {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -215,8 +219,10 @@ button + .additionalContext {
 
 #questionPreviews.importSuccess.removing {
   height: 0px;
+  margin-top: -10px;
   opacity: 0;
-  transition: opacity 0.1s, height 0.2s;
+  transition: opacity 0.1s, margin-top 0.2s, height 0.2s;
+  /* transition: margin-top 0.2s, height 0.2s; */
 }
 
 #questionPreviewsInner {
@@ -225,6 +231,7 @@ button + .additionalContext {
 
 #questionPreviews.importSuccess #questionPreviewsInner {
   opacity: 0;
+  pointer-events: none;
 }
 
 /* #questionPreviews.importSuccess::before {
@@ -257,9 +264,15 @@ button + .additionalContext {
   transform: translateX(-50%);
   /* transform: translate(-50%, -50%); */
 
+  /* transition: opacity 0.1s; */
+
   /* animation: showImportSuccess 0.2s 0.2s forwards; */
   animation: showImportSuccess 0.2s forwards;
 }
+
+/* #questionPreviews.importSuccess.removing::after {
+  opacity: 0;
+} */
 
 table#questions,
 table.questionPreviewsTable {
@@ -319,8 +332,6 @@ table.questionPreviewsTable th,
 table.questionPreviewsTable td {
   padding: 5px;
 }
-
-/* TODO: make `table.questionPreviewsTable tr` pointer on hover (for enable/disabling and moving) */
 
 table.questionPreviewsTable thead tr th:not(:first-of-type) {
   width: 50%;
