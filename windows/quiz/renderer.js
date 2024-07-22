@@ -5,6 +5,13 @@
   const questions = (await electronStore.get(`questions`)) ?? [];
   const popQuizConfig = (await electronStore.get("popQuizConfig")) ?? {};
 
+  const {
+    ignorePunctuation = false,
+    ignoreAccentMarks = false,
+    ignoreCapitalization = true,
+    showIncorrect = false,
+  } = popQuizConfig;
+
   const questionNumElem = document.getElementById("questionNum");
   const questionElem = document.getElementById("question");
   const answerElem = document.getElementById("answerInput");
@@ -55,11 +62,63 @@
     // quizStats.totalQuestions++;
 
     const providedAnswer = answerElem.value.trim();
+
+    let formattedProvidedAnswer;
+    let formattedCorrectAnswer;
+    if (providedAnswer) {
+      formattedProvidedAnswer = providedAnswer;
+      formattedCorrectAnswer = question.answer.trim(); // TODO: consider if trim should be done when saving
+
+      console.log(formattedProvidedAnswer);
+      console.log(formattedCorrectAnswer);
+
+      if (ignorePunctuation) {
+        // FIXME: fix this removing caps
+        const punctuationRegex = /[`~!@#$%^&*()-_=+\[{\]}\\|;:'",<.>/?]/g;
+        console.log("before");
+        console.log(formattedProvidedAnswer);
+        formattedProvidedAnswer = formattedProvidedAnswer.replace(
+          punctuationRegex,
+          ""
+        );
+        console.log(formattedProvidedAnswer);
+        console.log("after");
+        formattedCorrectAnswer = formattedCorrectAnswer.replace(
+          punctuationRegex,
+          ""
+        );
+      }
+
+      console.log(formattedProvidedAnswer);
+      console.log(formattedCorrectAnswer);
+
+      if (ignoreAccentMarks) {
+        // super interesting! https://stackoverflow.com/a/37511463
+        formattedProvidedAnswer = formattedProvidedAnswer
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+        formattedCorrectAnswer = formattedCorrectAnswer
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+      }
+
+      console.log(formattedProvidedAnswer);
+      console.log(formattedCorrectAnswer);
+
+      if (ignoreCapitalization) {
+        formattedProvidedAnswer = formattedProvidedAnswer.toLowerCase();
+        formattedCorrectAnswer = formattedCorrectAnswer.toLowerCase();
+      }
+
+      console.log(formattedProvidedAnswer);
+      console.log(formattedCorrectAnswer);
+    }
+
     if (!providedAnswer)
       createAlert(
         `Please provide an answer before submitting! Click "I'm Unsure" if you don't remember the answer.`
       );
-    else if (providedAnswer === question.answer) {
+    else if (formattedProvidedAnswer === formattedCorrectAnswer) {
       // quizStats.correctQuestions++;
       attemptsUsed++;
       if (attemptsUsed === 1) correctQuestions++;
@@ -126,8 +185,7 @@
         );
       }
 
-      if (popQuizConfig.showIncorrect ?? false)
-        answerElem.placeholder = providedAnswer;
+      if (showIncorrect) answerElem.placeholder = providedAnswer;
 
       answerElem.value = "";
     }

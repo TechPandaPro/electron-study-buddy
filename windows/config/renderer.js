@@ -26,6 +26,11 @@
     "popQuizIntervalContainer"
   );
   const popQuizQuestionCount = document.getElementById("popQuizQuestionCount");
+
+  const ignorePunctuation = document.getElementById("ignorePunctuation");
+  const ignoreAccentMarks = document.getElementById("ignoreAccentMarks");
+  const ignoreCapitalization = document.getElementById("ignoreCapitalization");
+
   const quizShowIncorrect = document.getElementById("quizShowIncorrect");
 
   // fetch dashboard config data
@@ -155,6 +160,9 @@
       intervalCount: 2,
       intervalTime: 1,
       questionCount: 3,
+      ignorePunctuation: false,
+      ignoreAccentMarks: false,
+      ignoreCapitalization: true,
       showIncorrect: false,
     };
 
@@ -201,6 +209,9 @@
       intervalCount: Number(popQuizIntervalCountElem.value),
       intervalTime: Number(popQuizIntervalTimeElem.value),
       questionCount: Number(popQuizQuestionCount.value),
+      ignorePunctuation: ignorePunctuation.checked,
+      ignoreAccentMarks: ignoreAccentMarks.checked,
+      ignoreCapitalization: ignoreCapitalization.checked,
       showIncorrect: quizShowIncorrect.checked,
     };
 
@@ -212,6 +223,9 @@
     popQuizIntervalCountElem.value = popQuizConfig.intervalCount;
     popQuizIntervalTimeElem.value = popQuizConfig.intervalTime;
     popQuizQuestionCount.value = popQuizConfig.questionCount;
+    ignorePunctuation.checked = popQuizConfig.ignorePunctuation;
+    ignoreAccentMarks.checked = popQuizConfig.ignoreAccentMarks;
+    ignoreCapitalization.checked = popQuizConfig.ignoreCapitalization;
     quizShowIncorrect.checked = popQuizConfig.showIncorrect;
 
     for (const row of document.querySelectorAll(".questionInputs"))
@@ -263,10 +277,18 @@
     if (saveBtnCheckTimeout) clearTimeout(saveBtnCheckTimeout);
     if (saveBtnCheck.dataset.show) delete saveBtnCheck.dataset.show;
 
-    const oldData = JSON.stringify(retrieveSavedCachedData());
-    const newData = JSON.stringify(retrieveDataToSave());
+    // const oldData = JSON.stringify(retrieveSavedCachedData());
+    // const newData = JSON.stringify(retrieveDataToSave());
 
-    const needsSave = oldData !== newData;
+    // console.log(`old: ${oldData}`);
+    // console.log(`new: ${newData}`);
+
+    // const needsSave = oldData !== newData;
+
+    const needsSave = !objectsDeepEqual(
+      retrieveSavedCachedData(),
+      retrieveDataToSave()
+    );
 
     if (needsSave) saveBtn.dataset.needsSave = true;
     else delete saveBtn.dataset.needsSave;
@@ -881,6 +903,26 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
 
     document.body.insertBefore(aiAssistOverlay, mainDashboardContainer);
   });
-
-  aiQuestionAssistBtn.click();
 })();
+
+function objectsDeepEqual(object1, object2) {
+  if (object1 === object2) return true;
+  if (
+    typeof object1 !== "object" ||
+    object1 === null ||
+    typeof object2 !== "object" ||
+    object2 === null ||
+    Object.keys(object1).length !== Object.keys(object2).length
+  )
+    return false;
+
+  for (const key in object1) {
+    const value1 = object1[key];
+    const value2 = object2[key];
+
+    if (objectsDeepEqual(value1, value2)) continue;
+    else return false;
+  }
+
+  return true;
+}

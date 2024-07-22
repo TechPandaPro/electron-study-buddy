@@ -169,6 +169,7 @@ h1 {
   color: rgb(255 255 255 / 0.5);
 }
 
+/* FIXME: prevent hint from overflowing when answer is too long */
 .hintWrapper {
   position: absolute;
   right: 10px;

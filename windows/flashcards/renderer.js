@@ -171,7 +171,7 @@
     // }`;
   }
 
-  flashcard.addEventListener("click", () => {
+  flashcard.addEventListener("click", (e) => {
     e.preventDefault();
     if (flashcard.dataset.rotating || document.querySelector(".newFlashcard"))
       return;
