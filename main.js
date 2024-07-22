@@ -254,7 +254,7 @@ function startFlashcards() {
     webPreferences: {
       preload: path.join(__dirname, "windows", "flashcards", "preload.js"),
     },
-    titleBarStyle: "hidden",
+    titleBarStyle: "customButtonsOnHover",
   });
   // flashcardsWin.setTrafficLightPosition({ x: 0, y: 0 });
   // flashcardsWin.setAlwaysOnTop(true, "floating");

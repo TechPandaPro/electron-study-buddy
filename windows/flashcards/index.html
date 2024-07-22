@@ -13,9 +13,31 @@
   </head>
   <body>
     <div id="dragRegion"></div>
+    <button id="previousFlashcard">
+      <svg
+        width="155"
+        height="266"
+        viewBox="0 0 155 266"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M0 133L155 -1.05575e-05L155 266L0 133Z" fill="black" />
+      </svg>
+    </button>
+    <!-- <div id="nextFlashcard">
+      <svg
+        width="155"
+        height="266"
+        viewBox="0 0 155 266"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M0 133L155 -1.05575e-05L155 266L0 133Z" fill="black" />
+      </svg>
+    </div> -->
     <div id="flashcardWrapper">
-      <div id="flashcard">
-        <div id="flashcardFront">
+      <div id="flashcard" data-side="front">
+        <div id="flashcardInner">
           <div class="flashcardText"></div>
         </div>
         <!-- <div id="flashcardBack">

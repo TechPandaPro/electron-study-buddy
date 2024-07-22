@@ -4,7 +4,7 @@
 
   const flashcard = document.getElementById("flashcard");
   const flashcardTextFront = document.querySelector(
-    "#flashcardFront .flashcardText"
+    "#flashcardInner .flashcardText"
   );
   // const flashcardTextBack = document.querySelector(
   //   "#flashcardBack .flashcardText"
@@ -18,17 +18,48 @@
   // flashcardTextBack.innerText = questions[questionIndex].answer;
 
   flashcard.addEventListener("click", () => {
+    if (flashcard.dataset.rotating) return;
+    flashcard.dataset.rotating = true;
     // if (flashcard.style.transform) flashcard.style.removeProperty("transform");
     // else flashcard.style.transform = "rotateY(-180deg)";
-    // flashcard.style.transform = "rotateY(-180deg)";
     flashcard.addEventListener(
-      "animationend",
+      "transitionend",
       () => {
-        flashcardTextFront.innerText = questions[questionIndex].answer;
+        flashcard.classList.remove("resizeForRotate");
+        flashcardTextFront.classList.remove("flipped");
+
+        flashcard.classList.add("noAnim");
+        flashcard.style.removeProperty("transform");
+        flashcard.offsetHeight;
+        flashcard.classList.remove("noAnim");
+
+        delete flashcard.dataset.rotating;
       },
       { once: true }
     );
-    flashcard.classList.add("spinning");
+    flashcard.style.transform = "rotateY(-180deg)";
+    flashcard.classList.add("resizeForRotate");
+    const durationStr = getComputedStyle(flashcard).getPropertyValue(
+      "transition-duration"
+    );
+    const durationHalfway = (Number(durationStr.slice(0, -1)) / 2) * 1000;
+    setTimeout(() => {
+      flashcard.dataset.side =
+        flashcard.dataset.side === "front" ? "back" : "front";
+      flashcardTextFront.innerText =
+        flashcard.dataset.side === "front"
+          ? questions[questionIndex].question
+          : questions[questionIndex].answer;
+      flashcardTextFront.classList.add("flipped");
+    }, durationHalfway);
+    // flashcard.addEventListener(
+    //   "animationend",
+    //   () => {
+    //     flashcardTextFront.innerText = questions[questionIndex].answer;
+    //   },
+    //   { once: true }
+    // );
+    // flashcard.classList.add("spinning");
   });
 
   // document.body.addEventListener("keydown", (e) => {

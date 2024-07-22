@@ -1,3 +1,5 @@
+/* TODO: add lines to flashcard (so it looks like a notecard) */
+
 html,
 body {
   height: 100%;
@@ -5,7 +7,6 @@ body {
 
 body {
   margin: 0;
-  cursor: pointer;
   /* background-color: rgb(0 0 0 / 0.1); */
   overflow: hidden;
 }
@@ -21,30 +22,59 @@ body {
   height: 28px;
 }
 
+#previousFlashcard {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+
+  cursor: pointer;
+
+  z-index: 1;
+}
+
+#previousFlashcard > svg {
+  width: 20px;
+  height: auto;
+}
+
 #flashcardWrapper {
   height: 100%;
-  /* perspective: 1000px; */
-  /* perspective-origin: 0 100px; */
+  perspective: 5000px;
+  perspective-origin: 0 100px;
 }
 
 #flashcard {
   height: 100%;
+  user-select: none;
+  cursor: pointer;
   /* font-size: 30px;
   text-align: center;
   vertical-align: middle; */
   /* background-color: blue; */
 
-  transition: transform 0.5s;
-
   /* transform-style: preserve-3d; */
 }
 
-#flashcard.spinning {
-  animation: flashcardSpinningFirst 1s ease-in forwards,
-    flashcardSpinningSecond 1s ease-out forwards;
+#flashcard:not(.noAnim) {
+  transition: transform 0.5s ease-in-out;
 }
 
-#flashcardFront {
+#flashcard.resizeForRotate #flashcardInner {
+  animation: resizeForRotate 0.5s ease-in-out;
+}
+
+/* #flashcard.spinning {
+  animation: flashcardSpinningFirst 1s ease-in forwards,
+    flashcardSpinningSecond 1s ease-out forwards;
+} */
+
+#flashcardInner {
   /* #flashcardBack { */
   position: absolute;
   top: 0;
@@ -75,11 +105,25 @@ body {
   vertical-align: middle;
 }
 
-@keyframes flashcardSpinningFirst {
-  /* from {
-    transform: rotateY(0deg);
-  } */
+.flashcardText.flipped {
+  transform: scaleX(-100%);
+}
 
+@keyframes resizeForRotate {
+  0% {
+    transform: scale(100%);
+  }
+
+  50% {
+    transform: scale(95%);
+  }
+
+  100% {
+    transform: scale(100%);
+  }
+}
+
+/* @keyframes flashcardSpinningFirst {
   to {
     transform: rotateY(-90deg);
   }
@@ -89,4 +133,4 @@ body {
   to {
     transform: rotateY(-180deg);
   }
-}
+} */
