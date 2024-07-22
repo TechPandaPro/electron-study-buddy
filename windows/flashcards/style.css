@@ -22,9 +22,32 @@ body {
   height: 28px;
 }
 
-#previousFlashcard {
+#previousFlashcardWrapper,
+#nextFlashcardWrapper {
   position: absolute;
-  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 60px;
+  height: 90px;
+
+  /* background-color: blue; */
+  z-index: 1;
+
+  cursor: pointer;
+}
+
+#previousFlashcardWrapper {
+  left: 0;
+}
+
+#nextFlashcardWrapper {
+  right: 0;
+}
+
+#previousFlashcard,
+#nextFlashcard {
+  position: absolute;
   top: 50%;
   transform: translateY(-50%);
 
@@ -36,9 +59,29 @@ body {
   cursor: pointer;
 
   z-index: 1;
+
+  transition: left 0.1s, right 0.1s;
 }
 
-#previousFlashcard > svg {
+#previousFlashcard {
+  left: 10px;
+}
+
+#nextFlashcard {
+  right: 10px;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+#previousFlashcardWrapper.hidden #previousFlashcard {
+  left: -25px;
+}
+
+#nextFlashcardWrapper.hidden #nextFlashcard {
+  right: -25px;
+}
+
+#previousFlashcard > svg,
+#nextFlashcard > svg {
   width: 20px;
   height: auto;
 }
@@ -49,7 +92,8 @@ body {
   perspective-origin: 0 100px;
 }
 
-#flashcard {
+#flashcard,
+.newFlashcard {
   height: 100%;
   user-select: none;
   cursor: pointer;
@@ -61,7 +105,12 @@ body {
   /* transform-style: preserve-3d; */
 }
 
-#flashcard:not(.noAnim) {
+#flashcard.replacingTop {
+  transition: transform 0.2s;
+  transform: scale(0.97);
+}
+
+#flashcard:not(.noAnim):not(.replacingTop) {
   transition: transform 0.5s ease-in-out;
 }
 
@@ -74,7 +123,8 @@ body {
     flashcardSpinningSecond 1s ease-out forwards;
 } */
 
-#flashcardInner {
+#flashcardInner,
+.newFlashcard {
   /* #flashcardBack { */
   position: absolute;
   top: 0;
@@ -99,7 +149,8 @@ body {
   transform: rotateY(180deg);
 } */
 
-.flashcardText {
+.flashcardText,
+.newFlashcard .newFlashcardText {
   font: bold 60px Arial, Helvetica, sans-serif;
   text-align: center;
   vertical-align: middle;
@@ -107,6 +158,21 @@ body {
 
 .flashcardText.flipped {
   transform: scaleX(-100%);
+}
+
+/* .newFlashcard {
+  position: absolute;
+  top: 0%;
+} */
+
+.newFlashcard.insert {
+  left: 100%;
+  animation: newFlashcardSlideIn 0.3s forwards ease;
+}
+
+.newFlashcard.underneath {
+  transform: scale(0.97);
+  animation: newFlashcardEnlarge 0.2s forwards ease;
 }
 
 @keyframes resizeForRotate {
@@ -120,6 +186,18 @@ body {
 
   100% {
     transform: scale(100%);
+  }
+}
+
+@keyframes newFlashcardSlideIn {
+  to {
+    left: 0;
+  }
+}
+
+@keyframes newFlashcardEnlarge {
+  to {
+    transform: scale(1);
   }
 }
 

@@ -2,19 +2,102 @@
   const electronAPI = window.electronAPI;
   const electronStore = electronAPI.electronStore;
 
+  const previousFlashcardWrapper = document.getElementById(
+    "previousFlashcardWrapper"
+  );
+  const nextFlashcardWrapper = document.getElementById("nextFlashcardWrapper");
+
   const flashcard = document.getElementById("flashcard");
-  const flashcardTextFront = document.querySelector(
+  const flashcardText = document.querySelector(
     "#flashcardInner .flashcardText"
   );
   // const flashcardTextBack = document.querySelector(
   //   "#flashcardBack .flashcardText"
   // );
 
+  const previousFlashcard = document.getElementById("previousFlashcard");
+  const nextFlashcard = document.getElementById("nextFlashcard");
+
   const questions = (await electronStore.get(`questions`)) ?? [];
 
   let questionIndex = 0;
 
-  flashcardTextFront.innerText = questions[questionIndex].question;
+  previousFlashcard.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    questionIndex--;
+    if (questionIndex < 0) questionIndex = questions.length - 1;
+
+    flashcard.classList.add("replacingUnderneath");
+
+    const newFlashcard = document.createElement("div");
+    newFlashcard.classList.add("newFlashcard");
+    newFlashcard.classList.add("underneath");
+
+    const newFlashcardText = document.createElement("div");
+    newFlashcardText.classList.add("newFlashcardText");
+    newFlashcardText.innerText = questions[questionIndex].question;
+
+    // newFlashcard.addEventListener("animationend", () => {
+    //   flashcard.classList.add("noAnim");
+    //   flashcard.classList.remove("replacingUnderneath");
+    //   flashcard.offsetHeight;
+    //   flashcard.classList.remove("noAnim");
+
+    //   flashcardText.innerText = newFlashcardText.innerText;
+    //   newFlashcard.remove();
+    // });
+
+    newFlashcard.append(newFlashcardText);
+    document.body.append(newFlashcard);
+  });
+
+  nextFlashcard.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    questionIndex++;
+    if (questionIndex === questions.length) questionIndex = 0;
+
+    flashcard.classList.add("replacingTop");
+
+    const newFlashcard = document.createElement("div");
+    newFlashcard.classList.add("newFlashcard");
+    newFlashcard.classList.add("insert");
+
+    const newFlashcardText = document.createElement("div");
+    newFlashcardText.classList.add("newFlashcardText");
+    newFlashcardText.innerText = questions[questionIndex].question;
+
+    newFlashcard.addEventListener("animationend", () => {
+      flashcard.classList.add("noAnim");
+      flashcard.classList.remove("replacingTop");
+      flashcard.offsetHeight;
+      flashcard.classList.remove("noAnim");
+
+      flashcardText.innerText = newFlashcardText.innerText;
+      newFlashcard.remove();
+    });
+
+    newFlashcard.append(newFlashcardText);
+    document.body.append(newFlashcard);
+  });
+
+  previousFlashcardWrapper.addEventListener("click", () => flashcard.click());
+  nextFlashcardWrapper.addEventListener("click", () => flashcard.click());
+  previousFlashcardWrapper.addEventListener("mouseenter", () =>
+    previousFlashcardWrapper.classList.remove("hidden")
+  );
+  previousFlashcardWrapper.addEventListener("mouseleave", () =>
+    previousFlashcardWrapper.classList.add("hidden")
+  );
+  nextFlashcardWrapper.addEventListener("mouseenter", () =>
+    nextFlashcardWrapper.classList.remove("hidden")
+  );
+  nextFlashcardWrapper.addEventListener("mouseleave", () =>
+    nextFlashcardWrapper.classList.add("hidden")
+  );
+
+  flashcardText.innerText = questions[questionIndex].question;
   // flashcardTextBack.innerText = questions[questionIndex].answer;
 
   flashcard.addEventListener("click", () => {
@@ -26,7 +109,7 @@
       "transitionend",
       () => {
         flashcard.classList.remove("resizeForRotate");
-        flashcardTextFront.classList.remove("flipped");
+        flashcardText.classList.remove("flipped");
 
         flashcard.classList.add("noAnim");
         flashcard.style.removeProperty("transform");
@@ -46,11 +129,11 @@
     setTimeout(() => {
       flashcard.dataset.side =
         flashcard.dataset.side === "front" ? "back" : "front";
-      flashcardTextFront.innerText =
+      flashcardText.innerText =
         flashcard.dataset.side === "front"
           ? questions[questionIndex].question
           : questions[questionIndex].answer;
-      flashcardTextFront.classList.add("flipped");
+      flashcardText.classList.add("flipped");
     }, durationHalfway);
     // flashcard.addEventListener(
     //   "animationend",
