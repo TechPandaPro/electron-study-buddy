@@ -7,6 +7,7 @@
   );
   const nextFlashcardWrapper = document.getElementById("nextFlashcardWrapper");
 
+  const flashcardWrapper = document.getElementById("flashcardWrapper");
   const flashcard = document.getElementById("flashcard");
   const flashcardText = document.querySelector(
     "#flashcardInner .flashcardText"
@@ -28,7 +29,10 @@
     questionIndex--;
     if (questionIndex < 0) questionIndex = questions.length - 1;
 
+    flashcard.classList.add("noAnim");
     flashcard.classList.add("replacingUnderneath");
+    flashcard.offsetHeight;
+    flashcard.classList.remove("noAnim");
 
     const newFlashcard = document.createElement("div");
     newFlashcard.classList.add("newFlashcard");
@@ -36,22 +40,27 @@
 
     const newFlashcardText = document.createElement("div");
     newFlashcardText.classList.add("newFlashcardText");
-    newFlashcardText.innerText = questions[questionIndex].question;
+    // newFlashcardText.innerText = questions[questionIndex].question;
+    newFlashcardText.innerText = flashcardText.innerText;
+
+    flashcardText.innerText = questions[questionIndex].question;
 
     newFlashcard.addEventListener("animationend", () => {
       // flashcard.classList.add("noAnim");
-      flashcard.classList.remove("replacingUnderneath");
+      newFlashcard.remove();
+
+      if (!document.querySelector(".newFlashcard.underneath"))
+        flashcard.classList.remove("replacingUnderneath");
       // flashcard.offsetHeight;
       // flashcard.classList.remove("noAnim");
 
-      flashcardText.innerText = newFlashcardText.innerText;
-      newFlashcard.remove();
+      // flashcardText.innerText = newFlashcardText.innerText;
     });
 
     newFlashcard.append(newFlashcardText);
     document.body.insertBefore(
       newFlashcard,
-      nextFlashcardWrapper.nextElementSibling
+      flashcardWrapper.nextElementSibling
     );
   });
 
