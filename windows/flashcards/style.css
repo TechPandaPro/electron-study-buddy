@@ -106,12 +106,17 @@ body {
 }
 
 #flashcard.replacingTop {
-  transition: transform 0.2s;
   transform: scale(0.97);
+  transition: transform 0.2s;
 }
 
-#flashcard:not(.noAnim):not(.replacingTop) {
+#flashcard:not(.noAnim):not(.replacingTop, .replacingUnderneath) {
   transition: transform 0.5s ease-in-out;
+}
+
+#flashcard.replacingUnderneath #flashcardInner {
+  left: 100%;
+  transition: left 0.2s;
 }
 
 #flashcard.resizeForRotate #flashcardInner {

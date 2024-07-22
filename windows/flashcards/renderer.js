@@ -38,18 +38,21 @@
     newFlashcardText.classList.add("newFlashcardText");
     newFlashcardText.innerText = questions[questionIndex].question;
 
-    // newFlashcard.addEventListener("animationend", () => {
-    //   flashcard.classList.add("noAnim");
-    //   flashcard.classList.remove("replacingUnderneath");
-    //   flashcard.offsetHeight;
-    //   flashcard.classList.remove("noAnim");
+    newFlashcard.addEventListener("animationend", () => {
+      // flashcard.classList.add("noAnim");
+      flashcard.classList.remove("replacingUnderneath");
+      // flashcard.offsetHeight;
+      // flashcard.classList.remove("noAnim");
 
-    //   flashcardText.innerText = newFlashcardText.innerText;
-    //   newFlashcard.remove();
-    // });
+      flashcardText.innerText = newFlashcardText.innerText;
+      newFlashcard.remove();
+    });
 
     newFlashcard.append(newFlashcardText);
-    document.body.append(newFlashcard);
+    document.body.insertBefore(
+      newFlashcard,
+      nextFlashcardWrapper.nextElementSibling
+    );
   });
 
   nextFlashcard.addEventListener("click", (e) => {
