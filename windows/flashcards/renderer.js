@@ -12,6 +12,7 @@
   const flashcardText = document.querySelector(
     "#flashcardInner .flashcardText"
   );
+  const flashcardNum = document.querySelector("#flashcardInner .flashcardNum");
   // const flashcardTextBack = document.querySelector(
   //   "#flashcardBack .flashcardText"
   // );
@@ -24,7 +25,14 @@
   let questionIndex = 0;
 
   previousFlashcard.addEventListener("click", (e) => {
+    e.preventDefault();
     e.stopPropagation();
+
+    if (
+      flashcard.dataset.rotating ||
+      document.querySelector(".newFlashcard.insert")
+    )
+      return;
 
     questionIndex--;
     if (questionIndex < 0) questionIndex = questions.length - 1;
@@ -43,7 +51,14 @@
     // newFlashcardText.innerText = questions[questionIndex].question;
     newFlashcardText.innerText = flashcardText.innerText;
 
+    const newFlashcardNum = document.createElement("div");
+    newFlashcardNum.classList.add("flashcardNum");
+    newFlashcardNum.innerText = flashcardNum.innerText;
+
     flashcardText.innerText = questions[questionIndex].question;
+    setFlashcardNum(flashcard, questionIndex, "question");
+
+    flashcard.dataset.side = "front";
 
     newFlashcard.addEventListener("animationend", () => {
       // flashcard.classList.add("noAnim");
@@ -57,7 +72,7 @@
       // flashcardText.innerText = newFlashcardText.innerText;
     });
 
-    newFlashcard.append(newFlashcardText);
+    newFlashcard.append(newFlashcardText, newFlashcardNum);
     document.body.insertBefore(
       newFlashcard,
       flashcardWrapper.nextElementSibling
@@ -65,7 +80,14 @@
   });
 
   nextFlashcard.addEventListener("click", (e) => {
+    e.preventDefault();
     e.stopPropagation();
+
+    if (
+      flashcard.dataset.rotating ||
+      document.querySelector(".newFlashcard.underneath")
+    )
+      return;
 
     questionIndex++;
     if (questionIndex === questions.length) questionIndex = 0;
@@ -80,6 +102,11 @@
     newFlashcardText.classList.add("newFlashcardText");
     newFlashcardText.innerText = questions[questionIndex].question;
 
+    const newFlashcardNum = document.createElement("div");
+    newFlashcardNum.classList.add("flashcardNum");
+
+    flashcard.dataset.side = "front";
+
     newFlashcard.addEventListener("animationend", () => {
       flashcard.classList.add("noAnim");
       flashcard.classList.remove("replacingTop");
@@ -87,10 +114,13 @@
       flashcard.classList.remove("noAnim");
 
       flashcardText.innerText = newFlashcardText.innerText;
+      flashcardNum.innerText = newFlashcardNum.innerText;
       newFlashcard.remove();
     });
 
-    newFlashcard.append(newFlashcardText);
+    newFlashcard.append(newFlashcardText, newFlashcardNum);
+    setFlashcardNum(newFlashcard, questionIndex, "question");
+
     document.body.append(newFlashcard);
   });
 
@@ -110,10 +140,41 @@
   );
 
   flashcardText.innerText = questions[questionIndex].question;
+  // flashcardNum.innerText = `${(questionIndex + 1)
+  //   .toString()
+  //   .padStart(questions.length.toString().length, "0")}/${questions.length}`;
+  setFlashcardNum(flashcard, questionIndex, "question");
   // flashcardTextBack.innerText = questions[questionIndex].answer;
 
+  function setFlashcardNum(flashcard, index, type) {
+    let flashcardNum = flashcard.querySelector(".flashcardNum");
+    if (!flashcardNum) {
+      const flashcardInner = flashcard.querySelector(".flashcardInner");
+      flashcardNum = document.createElement("div");
+      flashcardNum.classList.add("flashcardNum");
+      flashcardInner.appendChild(flashcardNum);
+    }
+
+    const typeLetter = type === "question" ? "Q" : "A";
+    const formattedNum = (index + 1)
+      .toString()
+      .padStart(questions.length.toString().length, "0");
+
+    const formattedStr = `${formattedNum}/${questions.length} (${typeLetter})`;
+
+    flashcardNum.innerText = formattedStr;
+
+    // flashcardNum.innerText = `${type === "question" ? "Q" : "A"} ${(index + 1)
+    //   .toString()
+    //   .padStart(questions.length.toString().length, "0")}/${
+    //   questions.length
+    // }`;
+  }
+
   flashcard.addEventListener("click", () => {
-    if (flashcard.dataset.rotating) return;
+    e.preventDefault();
+    if (flashcard.dataset.rotating || document.querySelector(".newFlashcard"))
+      return;
     flashcard.dataset.rotating = true;
     // if (flashcard.style.transform) flashcard.style.removeProperty("transform");
     // else flashcard.style.transform = "rotateY(-180deg)";
@@ -121,7 +182,7 @@
       "transitionend",
       () => {
         flashcard.classList.remove("resizeForRotate");
-        flashcardText.classList.remove("flipped");
+        flashcard.classList.remove("textFlipped");
 
         flashcard.classList.add("noAnim");
         flashcard.style.removeProperty("transform");
@@ -145,7 +206,12 @@
         flashcard.dataset.side === "front"
           ? questions[questionIndex].question
           : questions[questionIndex].answer;
-      flashcardText.classList.add("flipped");
+      setFlashcardNum(
+        flashcard,
+        questionIndex,
+        flashcard.dataset.side === "front" ? "question" : "answer"
+      );
+      flashcard.classList.add("textFlipped");
     }, durationHalfway);
     // flashcard.addEventListener(
     //   "animationend",

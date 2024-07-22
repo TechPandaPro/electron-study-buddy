@@ -32,7 +32,7 @@ body {
   height: 90px;
 
   /* background-color: blue; */
-  z-index: 1;
+  z-index: 3;
 
   cursor: pointer;
 }
@@ -166,6 +166,8 @@ body {
   background-repeat: no-repeat;
   border-radius: 15px; */
 
+  border-radius: 15px;
+
   backface-visibility: hidden;
 
   /* center the flashcard text */
@@ -204,8 +206,26 @@ body {
   z-index: 1;
 }
 
-.flashcardText.flipped {
+/* #flashcard.textFlipped {
+  background-color: blue;
+} */
+
+#flashcard.textFlipped .flashcardText {
   transform: scaleX(-100%);
+}
+
+#flashcard.textFlipped .flashcardNum {
+  transform: translateY(-50%) scaleX(-100%);
+}
+
+/* FIXME: prevent this from overlapping with long flashcardText elems */
+.flashcardNum {
+  position: absolute;
+  top: 84%;
+  transform: translateY(-50%);
+  font: 20px Arial, Helvetica, sans-serif;
+  letter-spacing: 1px;
+  color: rgb(160 160 160);
 }
 
 /* .newFlashcard {
