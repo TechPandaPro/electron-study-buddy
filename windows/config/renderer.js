@@ -78,6 +78,13 @@
       checkValues();
     });
 
+    questionInput.addEventListener("change", () => {
+      questionInput.value = questionInput.value.trim();
+    });
+    answerInput.addEventListener("change", () => {
+      answerInput.value = answerInput.value.trim();
+    });
+
     removeBtn.addEventListener("click", () => {
       newRow.remove();
       updateQuestionCountSelect();
@@ -182,8 +189,8 @@
   function retrieveDataToSave(updateInterface) {
     const questionElems = questionsBody.querySelectorAll("tr.questionInputs");
     let questions = Array.from(questionElems).map((question) => ({
-      question: question.querySelector(".questionInput").value,
-      answer: question.querySelector(".answerInput").value,
+      question: question.querySelector(".questionInput").value.trim(),
+      answer: question.querySelector(".answerInput").value.trim(),
       elem: question,
     }));
 
@@ -450,6 +457,8 @@
       filePreviews.innerHTML = "";
 
       if (genFile.files.length >= 1) {
+        // TODO: consider making image expandable (by clicking it)
+        // TODO: consider allowing drag-and-drop files
         for (const image of genFile.files) {
           const imageElem = document.createElement("img");
           imageElem.classList.add("filePreview");
@@ -462,7 +471,6 @@
 
         filePreviews.classList.remove("hidden");
       } else filePreviews.classList.add("hidden");
-      // FIXME: make an error/etc appear when trying to generate w/o uploading file
     });
 
     // TODO: ensure that these variables get reset when closing
@@ -497,10 +505,27 @@
 
     function checkScroll() {
       // console.log(mouseMoveY);
+
+      // const rowIsNear = Array.from(
+      //   questionPreviewsInner.querySelectorAll("tbody tr")
+      // ).some(
+      //   (row) => Math.abs(mouseMoveY - row.getBoundingClientRect().top) < 40
+      // );
+      // ).some((row) => {
+      // Math.min(
+      //   row.clientHeight,
+      //   Math.abs(window.innerHeight - row.clientHeight)
+      // )
+      // console.log(Math.abs(mouseMoveY - row.clientY));
+      // const rect = row.getBoundingClientRect();
+      // return Math.abs(mouseMoveY - rect.top) < 80;
+      // });
+
       const scrollPadding = getScrollPadding();
       const scrollBy = getScrollBy();
       // console.log(moving);
       // console.log("check!");
+      // if (mouseMoveY === null || !rowIsNear) checkingScroll = false;
       if (mouseMoveY === null) checkingScroll = false;
       else if (moving && mouseMoveY < scrollPadding)
         window.scrollTo(0, window.scrollY - scrollBy);
@@ -614,11 +639,19 @@
 
           return aDistance - bDistance;
         })[0];
+        // .filter(
+        //   (row) =>
+        //     // Math.min(
+        //     //   row.clientHeight,
+        //     //   Math.abs(window.innerHeight - row.clientHeight)
+        //     // )
+        //     Math.abs(mouseMoveY - row.clientY) < 60
+        // )[0];
 
-        console.log(nearestRow);
+        // console.log(nearestRow);
 
         // const hovering = e.target.parentElement;
-        if (nearestRow !== moveRow) {
+        if (nearestRow && nearestRow !== moveRow) {
           const position = moveRow.compareDocumentPosition(nearestRow);
           if (position === Node.DOCUMENT_POSITION_FOLLOWING)
             nearestRow.parentElement.insertBefore(
@@ -642,6 +675,14 @@
       const fileCount = genFile.files.length;
       const imageDataUrls = [];
 
+      if (genFile.files.length === 0) {
+        setGenFromImgLoading(false);
+        alert(
+          "An image of curriculum materials must be uploaded in order to generate questions."
+        );
+        return;
+      }
+
       for (const file of genFile.files) {
         const reader = new FileReader();
         reader.addEventListener(
@@ -656,13 +697,16 @@
         reader.readAsDataURL(file);
       }
 
-      // FIXME: handle lack of API key err
       // FIXME: make "create new questions" checkbox functional
-      // TODO: add customization (messages[1].content[0].text)
-      // TODO: add option to ignore punctuation/capitalization/etc. (enabled by default)
+      // TODO: ^ in regards to this, consider removing the checkbox altogether
       // TODO: add disclaimer/note to double check the content that AI Question Assist produces
 
       function sendDataUrls() {
+        if (!openAiApiKeyInput.value) {
+          alert("An API key must be provided in order to generate questions.");
+          setGenFromImgLoading(false);
+          return;
+        }
         fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -709,19 +753,10 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
         })
           .then((res) => res.json())
           .then((res) => {
-            const response = res.choices[0].message.content;
-
-            console.log(response);
-
-            let parsedResponse;
             try {
-              parsedResponse = JSON.parse(response);
-            } catch {
-              console.error("Error parsing response");
-            }
-
-            // FIXME: errors need to be caught here, too
-            if (parsedResponse) {
+              const response = res.choices[0].message.content;
+              console.log(response);
+              const parsedResponse = JSON.parse(response);
               console.log(parsedResponse);
 
               questionPreviews.classList.remove("hidden");
@@ -835,14 +870,19 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
               }
 
               for (const question of parsedResponse.questions) {
+                // TODO: add message about already-imported questions
+                const isChecked = !questions.some(
+                  (q) => q.question === question.question
+                );
+
                 const newRow = document.createElement("tr");
-                newRow.dataset.checked = true;
+                newRow.dataset.checked = isChecked;
 
                 const includeElemTd = document.createElement("td");
                 const includeElem = document.createElement("input");
                 includeElem.classList.add("includeCheckbox");
                 includeElem.type = "checkbox";
-                includeElem.checked = true;
+                includeElem.checked = isChecked;
                 // setQuestionImportCount();
                 // includeElem.addEventListener("input", setQuestionImportCount);
                 includeElem.addEventListener("input", () =>
@@ -872,7 +912,17 @@ Respond with a JSON object containing an array of question and answer pairs. Eac
               }
 
               setQuestionImportCount();
-            } else alert("An error occurred while generating the questions.");
+            } catch {
+              console.error("Error parsing response");
+              console.log(JSON.stringify(res));
+              alert(
+                `An error occurred while generating questions.${
+                  res.error.message.includes("Incorrect API key")
+                    ? ` Please ensure that the correct API key was provided and try again.`
+                    : ``
+                }`
+              );
+            }
 
             setGenFromImgLoading(false);
           });

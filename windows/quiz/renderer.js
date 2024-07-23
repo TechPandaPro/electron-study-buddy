@@ -67,30 +67,19 @@
     let formattedCorrectAnswer;
     if (providedAnswer) {
       formattedProvidedAnswer = providedAnswer;
-      formattedCorrectAnswer = question.answer.trim(); // TODO: consider if trim should be done when saving
-
-      console.log(formattedProvidedAnswer);
-      console.log(formattedCorrectAnswer);
+      formattedCorrectAnswer = question.answer;
 
       if (ignorePunctuation) {
-        // FIXME: fix this removing caps
-        const punctuationRegex = /[`~!@#$%^&*()-_=+\[{\]}\\|;:'",<.>/?]/g;
-        console.log("before");
-        console.log(formattedProvidedAnswer);
+        const punctuationRegex = /[`~!@#$%^&*()\-_=+\[{\]}\\|;:'",<.>/?]/g;
         formattedProvidedAnswer = formattedProvidedAnswer.replace(
           punctuationRegex,
           ""
         );
-        console.log(formattedProvidedAnswer);
-        console.log("after");
         formattedCorrectAnswer = formattedCorrectAnswer.replace(
           punctuationRegex,
           ""
         );
       }
-
-      console.log(formattedProvidedAnswer);
-      console.log(formattedCorrectAnswer);
 
       if (ignoreAccentMarks) {
         // super interesting! https://stackoverflow.com/a/37511463
@@ -102,16 +91,13 @@
           .replace(/[\u0300-\u036f]/g, "");
       }
 
-      console.log(formattedProvidedAnswer);
-      console.log(formattedCorrectAnswer);
-
       if (ignoreCapitalization) {
         formattedProvidedAnswer = formattedProvidedAnswer.toLowerCase();
         formattedCorrectAnswer = formattedCorrectAnswer.toLowerCase();
       }
 
-      console.log(formattedProvidedAnswer);
-      console.log(formattedCorrectAnswer);
+      // console.log(formattedProvidedAnswer);
+      // console.log(formattedCorrectAnswer);
     }
 
     if (!providedAnswer)
