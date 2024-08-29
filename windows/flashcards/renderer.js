@@ -24,6 +24,8 @@
 
   let questionIndex = 0;
 
+  // TODO: consider swiping to switch between flashcards
+
   previousFlashcard.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
