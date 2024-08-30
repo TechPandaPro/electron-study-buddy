@@ -50,7 +50,7 @@ const createWindows = () => {
     },
   });
   // TODO: remove dev tools - this is here just for dev testing
-  configWin.openDevTools({ mode: "detach" });
+  // configWin.openDevTools({ mode: "detach" });
   configWin.on("close", (e) => {
     let hideForClose = !configNeedsSave;
 
